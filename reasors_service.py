@@ -75,7 +75,7 @@ class ReasorsService:
             return Account(
                 token=output["token"],  # Always exists, not technically tied to authentication.
                 store_id=output.get("store_id", ""),
-                store_card_number=output.get("store_card_number", "")
+                store_card_number=output.get("store_card_number", ""),
             )
         else:
             raise AuthenticationError(f"Authentication Error: {response.status_code} - {response.content}")
@@ -87,15 +87,15 @@ class ReasorsService:
         return self.get_coupons(account=account, is_clippable=True, is_clipped=True)
 
     def get_redeemed_coupons(self, account: Account) -> CouponResponse:
-        """ Contains the is_redeemed param, which, if present in get_coupons(), may return incomplete results. """
+        """Contains the is_redeemed param, which, if present in get_coupons(), may return incomplete results."""
         url = (
-            f'{self.base_url}/1/offers?'
-            f'app_key=reasors&'
-            f'is_redeemed=true&'
-            f'offer_value_sort=desc&'
-            f'sort=offer_value&'
-            f'store_id={account.store_id}&'
-            f'token={account.token}'
+            f"{self.base_url}/1/offers?"
+            f"app_key=reasors&"
+            f"is_redeemed=true&"
+            f"offer_value_sort=desc&"
+            f"sort=offer_value&"
+            f"store_id={account.store_id}&"
+            f"token={account.token}"
         )
         response = requests.get(url, verify=False, headers=self.headers)
         if response.ok:
@@ -104,7 +104,7 @@ class ReasorsService:
                 coupon_count=response_json["total"],  # Always exists.
                 # These properties may not exist if there are no coupons returned.
                 total_value=response_json.get("total_value", "$0"),
-                coupons=[Coupon(**item) for item in response_json.get("items", [])]
+                coupons=[Coupon(**item) for item in response_json.get("items", [])],
             )
         else:
             OfferError(f"Offer API Error: {response.status_code} - {response.content}")
@@ -130,7 +130,7 @@ class ReasorsService:
                 coupon_count=response_json["total"],  # Always exists.
                 # These properties may not exist if there are no coupons returned.
                 total_value=response_json.get("total_value", "$0"),
-                coupons=[Coupon(**item) for item in response_json.get("items", [])]
+                coupons=[Coupon(**item) for item in response_json.get("items", [])],
             )
         else:
             OfferError(f"Offer API Error: {response.status_code} - {response.content}")
@@ -141,7 +141,7 @@ class ReasorsService:
             "referrer": "https://reasors.com/digital-coupons",
             "store_id": str(clip_payload.account.store_id),
             "token": clip_payload.account.token,
-            "utc": int(datetime.datetime.now(datetime.UTC).timestamp() * 1000)
+            "utc": int(datetime.datetime.now(datetime.UTC).timestamp() * 1000),
         }
 
         print(f"Clipping {len(clip_payload.coupons)}")
@@ -166,4 +166,3 @@ class ReasorsService:
                     OfferError(f"Offer API Error: {response.status_code} - {response.content}")
             activity.heartbeat(len(clipped_coupons))
         return clipped_coupons
-

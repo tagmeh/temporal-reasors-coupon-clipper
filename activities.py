@@ -13,13 +13,14 @@ class ReasorsActivities:
     @activity.defn
     async def get_accounts_json(self) -> list[dict[str, str]]:
         try:
-            with open('accounts.json') as f:
-                return json.load(f)['accounts']
+            with open("accounts.json") as f:
+                return json.load(f)["accounts"]
         except json.JSONDecodeError:
             raise
         except KeyError as err:
-            activity.logger.exception(f'Likely missing "accounts" top-level key in accounts.json. '
-                                      f'See accounts-example.json. Error: {err}')
+            activity.logger.exception(
+                f'Likely missing "accounts" top-level key in accounts.json. ' f"See accounts-example.json. Error: {err}"
+            )
         except Exception as err:
             activity.logger.exception(f"Unhandled JSON Exception: {err}", exc_info=True)
             raise
@@ -39,9 +40,9 @@ class ReasorsActivities:
         try:
             coupon_response: CouponResponse = self.reasors_service.get_unclipped_coupons(account=account)
             if coupon_response.coupon_count > 0:
-                print(f'Found {coupon_response.coupon_count} coupons!')
+                print(f"Found {coupon_response.coupon_count} coupons!")
             else:
-                print('No new coupons.')
+                print("No new coupons.")
             return coupon_response
         except OfferError:
             raise

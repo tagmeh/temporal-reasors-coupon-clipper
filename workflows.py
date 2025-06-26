@@ -21,17 +21,14 @@ class ClipCouponsChildWorkflow:
         )
 
         account: Account = await workflow.execute_activity(
-            ReasorsActivities.auth,
-            creds,
-            start_to_close_timeout=timedelta(seconds=30),
-            retry_policy=retry_policy
+            ReasorsActivities.auth, creds, start_to_close_timeout=timedelta(seconds=30), retry_policy=retry_policy
         )
 
         coupon_response: CouponResponse = await workflow.execute_activity(
             ReasorsActivities.get_available_coupons,
             account,
             start_to_close_timeout=timedelta(seconds=30),
-            retry_policy=retry_policy
+            retry_policy=retry_policy,
         )
 
         print(f"Found {len(coupon_response.coupons)} coupons.")
@@ -41,10 +38,10 @@ class ClipCouponsChildWorkflow:
             ClipPayload(account=account, coupons=coupon_response.coupons),
             start_to_close_timeout=timedelta(seconds=30),
             heartbeat_timeout=timedelta(seconds=10),
-            retry_policy=retry_policy
+            retry_policy=retry_policy,
         )
 
-        print(f'Clipped {len(clipped_coupons)} coupon(s)!')
+        print(f"Clipped {len(clipped_coupons)} coupon(s)!")
 
         return str(len(coupon_response.coupons))
 
@@ -60,20 +57,19 @@ class ClipCouponsWorkflow:
         )
 
         accounts: list[dict[str, str]] = await workflow.execute_activity(
-            ReasorsActivities.get_accounts_json,
-            start_to_close_timeout=timedelta(seconds=5),
-            retry_policy=retry_policy
+            ReasorsActivities.get_accounts_json, start_to_close_timeout=timedelta(seconds=5), retry_policy=retry_policy
         )
 
         tasks = [
             workflow.start_child_workflow(
                 ClipCouponsChildWorkflow.run,
-                Creds(username=account['username'], password=account['password']),
+                Creds(username=account["username"], password=account["password"]),
                 id=f"Reasors Coupon Clipper Child: {num}",  # {account['username'].lower().split('@')[0]}
-                parent_close_policy=ParentClosePolicy.ABANDON
-            ) for num, account in enumerate(accounts)
+                parent_close_policy=ParentClosePolicy.ABANDON,
+            )
+            for num, account in enumerate(accounts)
         ]
 
         await asyncio.gather(*tasks)
 
-        return f'Finished parent workflow. Ran for {len(accounts)} accounts.'
+        return f"Finished parent workflow. Ran for {len(accounts)} accounts."

@@ -15,10 +15,11 @@ class Creds(BaseModel):
     Password is encrypted. The password is decrypted immediately before use,
     and no object is updated with it's decrypted value.
     """
+
     username: str
     password: str
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_required_inputs(self) -> Self:
         if not self.username or not self.password:
             raise ValueError("Username and password must be provided.")
@@ -30,11 +31,12 @@ class Account(BaseModel):
     An account representation. Technically authenticated with the server, however, if the store_id and store_card_number
     are missing, then we don't have enough information to query or clip coupons.
     """
+
     token: str
     store_id: str
     store_card_number: str
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_model(self) -> Self:
         errors = []
 
@@ -48,7 +50,7 @@ class Account(BaseModel):
             )
 
         if errors:
-            raise MissingAccountInfoError('\n'.join(errors))
+            raise MissingAccountInfoError("\n".join(errors))
         return self
 
 
@@ -57,7 +59,8 @@ class CouponConfig(BaseModel):
     A config object within the coupon that contains easier to work with values.
     The alternative is to use string manipulation on values like: "$0.50" instead of using price_off: float.
     """
-    model_config = ConfigDict(extra='allow')  # Stores extra fields in self.__pydantic_extra__
+
+    model_config = ConfigDict(extra="allow")  # Stores extra fields in self.__pydantic_extra__
 
     type: str  # price_off  Might reference the 'price_off' variable. Unsure of all options
     price_off: float  # 0.5  Half a US Dollar
@@ -83,8 +86,9 @@ class Coupon(BaseModel):
     However, the only field we need to clip the coupon is "id".
     Other fields like "is_redeemed" and the date fields may be used to track savings.
     """
+
     model_config = ConfigDict(
-        extra='allow',  # Stores extra fields in self.__pydantic_extra__
+        extra="allow",  # Stores extra fields in self.__pydantic_extra__
         # arbitrary_types_allowed=True
     )
 
@@ -132,13 +136,15 @@ class Coupon(BaseModel):
 
 
 class CouponResponse(BaseModel):
-    """ The response object from the /1/offers? endpoint. """
+    """The response object from the /1/offers? endpoint."""
+
     total_value: str  # "$5.00"
     coupon_count: int
     coupons: list[Coupon]
 
 
 class ClipPayload(BaseModel):
-    """ Input/Payload object passed into the clip coupons activity and service method."""
+    """Input/Payload object passed into the clip coupons activity and service method."""
+
     account: Account
     coupons: list[Coupon]
