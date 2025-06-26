@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+temporalio = "*"
+requests = "*"
+cryptography = "*"
+python-dotenv = "*"
+pydantic = "*"
+
+[dev-packages]
+black = "*"
+types-requests = "*"
+mypy = "*"
+pytest = "*"
+pytest-asyncio = "*"
+
+[requires]
+python_version = "3.12"

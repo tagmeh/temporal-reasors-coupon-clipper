@@ -1,0 +1,12 @@
+{
+  "accounts": [
+    {
+      "username": "Email@email.com",
+      "password": "encrypted-password-use-encrypt_password"
+    },
+    {
+      "username": "BetterEmail@website.com",
+      "password": "encrypted-password-use-encrypt_password"
+    }
+  ]
+}
