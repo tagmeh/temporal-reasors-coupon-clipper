@@ -53,7 +53,7 @@ class ClipCouponsWorkflow:
         retry_policy = RetryPolicy(
             maximum_attempts=3,
             maximum_interval=timedelta(seconds=10),
-            non_retryable_error_types=["JSONDecodeError"],
+            non_retryable_error_types=["JSONDecodeError", "KeyError"],
         )
 
         accounts: list[dict[str, str]] = await workflow.execute_activity(

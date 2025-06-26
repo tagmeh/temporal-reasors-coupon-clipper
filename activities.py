@@ -14,13 +14,14 @@ class ReasorsActivities:
     async def get_accounts_json(self) -> list[dict[str, str]]:
         try:
             with open("accounts.json") as f:
-                return json.load(f)["accounts"]
+                return json.load(f)["accounts"]  # type: Dict[str, str]
         except json.JSONDecodeError:
             raise
         except KeyError as err:
             activity.logger.exception(
                 f'Likely missing "accounts" top-level key in accounts.json. ' f"See accounts-example.json. Error: {err}"
             )
+            raise
         except Exception as err:
             activity.logger.exception(f"Unhandled JSON Exception: {err}", exc_info=True)
             raise

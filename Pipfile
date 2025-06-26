@@ -16,6 +16,12 @@ types-requests = "*"
 mypy = "*"
 pytest = "*"
 pytest-asyncio = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.12"
+
+[scripts]
+coverage = "coverage run -m unittest discover"
+report = "coverage report"
+html = "coverage html"
