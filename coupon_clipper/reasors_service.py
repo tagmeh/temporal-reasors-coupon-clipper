@@ -3,17 +3,15 @@ import datetime
 from dataclasses import dataclass
 
 import requests
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from dotenv import dotenv_values
 from temporalio import activity
 
-from coupon_clipper.exceptions import AuthenticationError, OfferError
+from coupon_clipper.exceptions import AuthenticationError, OfferError, ConfigError
 from coupon_clipper.shared import Account, Creds, CouponResponse, Coupon, ClipPayload
-
-config = dotenv_values("../.env")
 
 
 @dataclass
@@ -37,19 +35,26 @@ class ReasorsService:
             "sec-fetch-site": "cross-site",
             "sec-gpc": "1",
         }
+        self.config = dotenv_values("../.env")
 
-    @staticmethod
-    def decrypt_password(encrypted_password: str) -> str:
+    def decrypt_password(self, encrypted_password: str) -> str:
         encoded_encrypted_password = encrypted_password.encode()
-        password = config["DECRYPTION_MASTER_KEY"].encode()
-        salt = base64.b64decode(config["PASSWORD_SALT_BASE64"])
+        try:
+            password = self.config["DECRYPTION_MASTER_KEY"].encode()
+            salt = base64.b64decode(self.config["PASSWORD_SALT_BASE64"])
+        except KeyError as err:
+            raise ConfigError(f"Missing configuration value in .env file: {err}")
 
         # Derive the key
         kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=100_000, backend=default_backend())
         key = base64.urlsafe_b64encode(kdf.derive(password))
 
         f = Fernet(key)
-        password = f.decrypt(encoded_encrypted_password).decode()
+        try:
+            password = f.decrypt(encoded_encrypted_password).decode()
+        except InvalidToken as err:
+            activity.logger.error(f"Passed in non-encrypted password. Error: {err}")
+            raise
         return password
 
     def authenticate(self, creds: Creds) -> Account:
