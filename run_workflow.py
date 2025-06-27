@@ -4,8 +4,8 @@ import traceback
 from temporalio.client import Client, WorkflowFailureError
 from temporalio.contrib.pydantic import pydantic_data_converter
 
-from shared import REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME
-from workflows import ClipCouponsWorkflow
+from coupon_clipper.shared import REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME
+from coupon_clipper.workflows import ClipCouponsWorkflow
 
 
 async def main() -> None:
@@ -14,7 +14,7 @@ async def main() -> None:
 
     try:
         result = await client.execute_workflow(
-            ClipCouponsWorkflow.run,
+            "ClipCouponsWorkflow",
             id="Reasors Coupon Clipper Parent",
             task_queue=REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME,
         )

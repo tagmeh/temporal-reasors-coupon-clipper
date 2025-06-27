@@ -4,9 +4,9 @@ from temporalio.client import Client
 from temporalio.contrib.pydantic import pydantic_data_converter
 from temporalio.worker import Worker
 
-from activities import ReasorsActivities
-from shared import REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME
-from workflows import ClipCouponsWorkflow, ClipCouponsChildWorkflow
+from coupon_clipper.activities import ReasorsActivities
+from coupon_clipper.shared import REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME
+from coupon_clipper.workflows import ClipCouponsWorkflow, ClipCouponsChildWorkflow
 
 
 async def main() -> None:
