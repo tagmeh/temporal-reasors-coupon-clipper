@@ -3,7 +3,6 @@ import datetime
 from dataclasses import dataclass
 
 import requests
-import urllib3
 from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
@@ -11,19 +10,16 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from dotenv import dotenv_values
 from temporalio import activity
 
-from exceptions import AuthenticationError, OfferError
-from shared import Account, Creds, CouponResponse, Coupon, ClipPayload
+from coupon_clipper.exceptions import AuthenticationError, OfferError
+from coupon_clipper.shared import Account, Creds, CouponResponse, Coupon, ClipPayload
 
-config = dotenv_values(".env")
-
-# Suppress only the single warning from urllib3.
-urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
+config = dotenv_values("../.env")
 
 
 @dataclass
 class ReasorsService:
     def __init__(self) -> None:
-        """Initialize the service and return an authenticated Account object."""
+        """Initialize the service"""
         self.base_url: str = "https://api.freshop.ncrcloud.com"
         self.headers: dict[str, str] = {
             "accept": "application/json, text/javascript, */*; q=0.01",

@@ -6,8 +6,8 @@ from temporalio.common import RetryPolicy
 from temporalio.workflow import ParentClosePolicy
 
 with workflow.unsafe.imports_passed_through():
-    from activities import ReasorsActivities
-    from shared import Creds, Account, CouponResponse, ClipPayload, Coupon
+    from coupon_clipper.activities import ReasorsActivities
+    from coupon_clipper.shared import Creds, Account, CouponResponse, ClipPayload, Coupon
 
 
 @workflow.defn
@@ -62,12 +62,12 @@ class ClipCouponsWorkflow:
 
         tasks = [
             workflow.start_child_workflow(
-                ClipCouponsChildWorkflow.run,
+                "ClipCouponsChildWorkflow",
                 Creds(username=account["username"], password=account["password"]),
-                id=f"Reasors Coupon Clipper Child: {num}",  # {account['username'].lower().split('@')[0]}
+                id=f"Reasors Coupon Clipper Child: {account['username'].lower().split('@')[0]}",
                 parent_close_policy=ParentClosePolicy.ABANDON,
             )
-            for num, account in enumerate(accounts)
+            for account in accounts
         ]
 
         await asyncio.gather(*tasks)

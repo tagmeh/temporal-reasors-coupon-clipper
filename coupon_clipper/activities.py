@@ -2,9 +2,9 @@ import json
 
 from temporalio import activity
 
-from exceptions import AuthenticationError, OfferError
-from reasors_service import ReasorsService
-from shared import Creds, Account, CouponResponse, ClipPayload, Coupon
+from coupon_clipper.exceptions import AuthenticationError, OfferError
+from coupon_clipper.reasors_service import ReasorsService
+from coupon_clipper.shared import Creds, Account, CouponResponse, ClipPayload, Coupon
 
 
 class ReasorsActivities:

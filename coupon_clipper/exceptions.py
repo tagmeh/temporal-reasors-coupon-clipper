@@ -1,5 +1,10 @@
 from dataclasses import dataclass
 
+import urllib3
+
+# Suppress only the single warning from urllib3.
+urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
+
 
 @dataclass
 class AuthenticationError(Exception):

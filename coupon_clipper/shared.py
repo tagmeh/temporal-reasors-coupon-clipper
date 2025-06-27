@@ -4,7 +4,7 @@ from typing import Any
 from pydantic import BaseModel, model_validator, ConfigDict
 from typing_extensions import Self
 
-from exceptions import MissingAccountInfoError
+from coupon_clipper.exceptions import MissingAccountInfoError
 
 REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME = "REASORS_COUPON_CLIPPER_TASK_QUEUE"
 

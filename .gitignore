@@ -1,5 +1,5 @@
 # Project Specific
-accounts.json
+coupon_clipper/accounts.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
