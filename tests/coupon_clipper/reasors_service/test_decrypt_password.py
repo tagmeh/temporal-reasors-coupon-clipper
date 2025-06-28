@@ -1,12 +1,19 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from cryptography.fernet import InvalidToken
 
 from coupon_clipper.exceptions import ConfigError
 from coupon_clipper.reasors_service import ReasorsService
 
-class TestReasorsService(unittest.TestCase):
+
+class TestReasorsServiceDecryptPassword(unittest.TestCase):
+    """
+    Tests the ReasorsService.decrypt_password method.
+
+    Does not test if the password is correct, only that it can be successfully decrypted.
+    """
+
     def setUp(self):
         self.config = {
             "DECRYPTION_MASTER_KEY": "CoolMasterKeyPassword",
@@ -26,7 +33,7 @@ class TestReasorsService(unittest.TestCase):
         decrypted_password = self.service.decrypt_password(self.encrypted_test_password)
 
         # Assert
-        self.assertEqual(decrypted_password, self.test_password)
+        self.assertEqual(decrypted_password, self.test_password, decrypted_password)
 
     def test_decrypt_password_missing_config_props(self):
         # Arrange
@@ -51,4 +58,3 @@ class TestReasorsService(unittest.TestCase):
         # Act/Assert
         with self.assertRaises(InvalidToken):
             self.service.decrypt_password(not_encrypted_test_password)
-

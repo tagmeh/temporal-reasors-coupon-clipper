@@ -92,21 +92,23 @@ class Coupon(BaseModel):
         # arbitrary_types_allowed=True
     )
 
+    # This is the only required property
     id: str  # 'ice_123_123123' Used in the url when "clipping" the coupon
-    name: str  # 'Save $0.50'
-    description: str  # 'Best Choice Superior Selections...'
-    brand: str  # 'Best Choice Superior Ultra Excellence Mega Grand Selections'
-    department_id: str  # 'grocery'
-    department: str  # 'Grocery'
-    start_date: date  # 'YYYY-MM-DD'
-    finish_date: date  # 'YYYY-MM-DD'
-    clip_start_date: date  # 'YYYY-MM-DD'
-    clip_end_date: date  # 'YYYY-MM-DD'
-    is_redeemed: bool
-    is_clipped: bool
-    is_clippable: bool
-    offer_value: str  # '$0.50'
-    # Optionals, only here for potential future use.
+    # All fields below this point aren't required for clipping.
+    name: str | None = None  # 'Save $0.50'
+    description: str | None = None  # 'Best Choice Superior Selections...'
+    brand: str | None = None  # 'Best Choice Superior Ultra Excellence Mega Grand Selections'
+    start_date: date | None = None  # 'YYYY-MM-DD'
+    finish_date: date | None = None  # 'YYYY-MM-DD'
+    clip_start_date: date | None = None  # 'YYYY-MM-DD'
+    clip_end_date: date | None = None  # 'YYYY-MM-DD'
+    is_redeemed: bool | None = None
+    is_clipped: bool | None = None
+    is_clippable: bool | None = None
+    offer_value: str | None = None  # '$0.50'
+    # Properties below this point aren't really used for anything yet.
+    department_id: str | None = None  # 'grocery'
+    department: str | None = None  # 'Grocery'
     config: CouponConfig | None = None
     popularity: int | None = None  # 999999
     is_personalized: bool | None = None
@@ -138,8 +140,8 @@ class Coupon(BaseModel):
 class CouponResponse(BaseModel):
     """The response object from the /1/offers? endpoint."""
 
-    total_value: str  # "$5.00"
     coupon_count: int
+    total_value: str  # "$5.00"
     coupons: list[Coupon]
 
 
