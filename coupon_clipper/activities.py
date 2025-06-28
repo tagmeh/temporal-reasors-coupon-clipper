@@ -12,25 +12,38 @@ class ReasorsActivities:
 
     @activity.defn
     async def get_accounts_json(self) -> list[dict[str, str]]:
+        """
+        Simply reads the accounts.json file,
+        returning the contents of the "accounts" top-level property of the file contents.
+        """
         try:
-            with open("accounts.json") as f:
+            with open("accounts.json", 'r') as f:
                 return json.load(f)["accounts"]  # type: dict[str, str]
-        except json.JSONDecodeError:
+        except FileNotFoundError as err:
+            activity.logger.exception(
+                f"Missing 'accounts.json' file in project directory. Error: {err}"
+            )
+            raise
+        except json.JSONDecodeError as err:
+            activity.logger.exception(
+                f"Error decoding JSON from accounts.json. "
+                f"Ensure it is valid JSON format. Error: {err}"
+            )
             raise
         except KeyError as err:
             activity.logger.exception(
-                f'Likely missing "accounts" top-level key in accounts.json. ' f"See accounts-example.json. Error: {err}"
+                f'Likely missing "accounts" top-level key in accounts.json. '
+                f'See accounts-example.json. Error: {err}'
             )
             raise
-        except Exception as err:
-            activity.logger.exception(f"Unhandled JSON Exception: {err}", exc_info=True)
-            raise
+        # TODO: Should every activity have a generic catchall Exception?
 
     @activity.defn
     async def auth(self, creds: Creds) -> Account:
         try:
             return self.reasors_service.authenticate(creds=creds)
-        except AuthenticationError:
+        except AuthenticationError as err:
+            activity.logger.exception(err, exc_info=True)
             raise
         except Exception as err:
             activity.logger.exception(f"Unhandled Auth Exception: {err}", exc_info=True)
@@ -45,7 +58,8 @@ class ReasorsActivities:
             else:
                 print("No new coupons.")
             return coupon_response
-        except OfferError:
+        except OfferError as err:
+            activity.logger.exception(err, exc_info=True)
             raise
         except Exception as err:
             activity.logger.exception(f"Unhandled Coupon Exception: {err}", exc_info=True)
@@ -55,7 +69,7 @@ class ReasorsActivities:
     async def clip_coupons(self, clip_payload: ClipPayload) -> list[Coupon]:
         try:
             output_coupons: list[Coupon] = []
-            for coupon in clip_payload.coupons: # Coupon
+            for coupon in clip_payload.coupons:  # Coupon
 
                 if coupon.is_clipped:
                     continue
