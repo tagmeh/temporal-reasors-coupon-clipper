@@ -6,7 +6,7 @@ from coupon_clipper.reasors_service import ReasorsService
 from coupon_clipper.shared import Account, Coupon, CouponResponse
 
 
-class TestReasorsServiceDecryptPassword(unittest.TestCase):
+class TestReasorsServiceGetCoupons(unittest.TestCase):
     """
     Tests the ReasorsService get_coupons and get_redeemed_coupons methods.
 

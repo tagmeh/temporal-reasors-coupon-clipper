@@ -54,7 +54,15 @@ class ReasorsActivities:
     @activity.defn
     async def clip_coupons(self, clip_payload: ClipPayload) -> list[Coupon]:
         try:
-            return self.reasors_service.clip_coupons(clip_payload=clip_payload)
+            output_coupons: list[Coupon] = []
+            for coupon in clip_payload.coupons: # Coupon
+
+                if coupon.is_clipped:
+                    continue
+
+                output_coupons.append(self.reasors_service.clip_coupon(account=clip_payload.account, coupon=coupon))
+
+            return output_coupons
         except OfferError:
             raise
         except Exception as err:

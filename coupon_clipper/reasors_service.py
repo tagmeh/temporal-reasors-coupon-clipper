@@ -11,7 +11,7 @@ from dotenv import dotenv_values
 from temporalio import activity
 
 from coupon_clipper.exceptions import AuthenticationError, OfferError, ConfigError
-from coupon_clipper.shared import Account, Creds, CouponResponse, Coupon, ClipPayload
+from coupon_clipper.shared import Account, Creds, CouponResponse, Coupon
 
 
 @dataclass
@@ -105,7 +105,7 @@ class ReasorsService:
                 coupons=[Coupon(**item) for item in response_json.get("items", [])],
             )
         else:
-            raise OfferError(f"Offer API Error: {response.status_code} - {response.json()}")
+            raise OfferError(f"Get Coupons API Error: {response.status_code} - {response.json()}")
 
     def get_redeemed_coupons(self, account: Account) -> CouponResponse:
         """Contains the is_redeemed param, which, if present in get_coupons(), may return incomplete results. """
@@ -128,36 +128,40 @@ class ReasorsService:
                 coupons=[Coupon(**item) for item in response_json.get("items", [])],
             )
         else:
-            raise OfferError(f"Offer API Error: {response.status_code} - {response.content}")
+            raise OfferError(f"Redeemed API Error: {response.status_code} - {response.content}")
 
-    def clip_coupons(self, clip_payload: ClipPayload) -> list[Coupon]:
+
+    def clip_coupon(self, account: Account, coupon: Coupon) -> Coupon:
+        """
+        Attempts to clip a coupon.
+        Clipping a clipped coupon does not fail.
+        """
         payload = {
             "app_key": "reasors",
             "referrer": "https://reasors.com/digital-coupons",
-            "store_id": str(clip_payload.account.store_id),
-            "token": clip_payload.account.token,
+            "store_id": str(account.store_id),
+            "token": account.token,
             "utc": int(datetime.datetime.now(datetime.UTC).timestamp() * 1000),
         }
 
-        print(f"Clipping {len(clip_payload.coupons)}")
+        print(f"Clipping {coupon.id}")
 
-        clipped_coupons: list[Coupon] = []
-        for coupon in clip_payload.coupons[:1]:  # Coupon
-            # Not sure if updating the coupon.is_clipped = True will work with Temporal's activity retry.
-            # However, if it does, this avoids attempting to re-clip the same clipped coupons.
-            if not coupon.is_clipped:  # Coupon was probably clipped on a previously failed activity run.
-                url = f"{self.base_url}/1/offers/{coupon.id}/clip"
-                response = requests.post(url, data=payload, headers=self.headers, verify=False)
+        url = f"{self.base_url}/1/offers/{coupon.id}/clip"
+        response = requests.post(url, data=payload, headers=self.headers, verify=False)
+        # The response payload is not useful to this project.
 
-                if response.ok:
-                    print(
-                        f"Clipped coupon {coupon.id}. "
-                        f"Value: {coupon.offer_value} for {coupon.brand}: {coupon.description}"
-                    )
-                    # Updating is_clipped here, but we could just re-query the coupons to get the same value.
-                    coupon.is_clipped = True
-                    clipped_coupons.append(coupon)
-                else:
-                    OfferError(f"Offer API Error: {response.status_code} - {response.content}")
-            activity.heartbeat(len(clipped_coupons))
-        return clipped_coupons
+        if response.ok:
+            print(  # TODO: Use Temporal's logging. Also, find out where these logs exist in the GUI.
+                f"Clipped coupon {coupon.id}. "
+                f"Value: {coupon.offer_value} for {coupon.brand}: {coupon.description}"
+            )
+            # Updating is_clipped here, but we could just re-query the coupons to get the same value.
+            coupon.is_clipped = True
+        else:
+            activity.logger.warn(f"Failed to clip coupon '{coupon.id}': {response.status_code} - {response.content}")
+
+        print(f"{coupon.id=}")
+        # TODO: Review activity timeouts. Do we need a heartbeat or a len(coupons)*5 seconds for the timeout.
+        # activity.heartbeat(str(coupon.id))  # TODO: heartbeat fails if coupon.id is an empty string. Not sure why yet.
+
+        return coupon
