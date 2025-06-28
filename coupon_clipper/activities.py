@@ -14,7 +14,7 @@ class ReasorsActivities:
     async def get_accounts_json(self) -> list[dict[str, str]]:
         try:
             with open("accounts.json") as f:
-                return json.load(f)["accounts"]  # type: Dict[str, str]
+                return json.load(f)["accounts"]  # type: dict[str, str]
         except json.JSONDecodeError:
             raise
         except KeyError as err:
@@ -39,7 +39,7 @@ class ReasorsActivities:
     @activity.defn
     async def get_available_coupons(self, account: Account) -> CouponResponse:
         try:
-            coupon_response: CouponResponse = self.reasors_service.get_unclipped_coupons(account=account)
+            coupon_response: CouponResponse = self.reasors_service.get_coupons(account=account, is_clipped=False)
             if coupon_response.coupon_count > 0:
                 print(f"Found {coupon_response.coupon_count} coupons!")
             else:

@@ -3,17 +3,15 @@ import datetime
 from dataclasses import dataclass
 
 import requests
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from dotenv import dotenv_values
 from temporalio import activity
 
-from coupon_clipper.exceptions import AuthenticationError, OfferError
+from coupon_clipper.exceptions import AuthenticationError, OfferError, ConfigError
 from coupon_clipper.shared import Account, Creds, CouponResponse, Coupon, ClipPayload
-
-config = dotenv_values("../.env")
 
 
 @dataclass
@@ -37,19 +35,26 @@ class ReasorsService:
             "sec-fetch-site": "cross-site",
             "sec-gpc": "1",
         }
+        self.config = dotenv_values("../.env")
 
-    @staticmethod
-    def decrypt_password(encrypted_password: str) -> str:
+    def decrypt_password(self, encrypted_password: str) -> str:
         encoded_encrypted_password = encrypted_password.encode()
-        password = config["DECRYPTION_MASTER_KEY"].encode()
-        salt = base64.b64decode(config["PASSWORD_SALT_BASE64"])
+        try:
+            password = self.config["DECRYPTION_MASTER_KEY"].encode()
+            salt = base64.b64decode(self.config["PASSWORD_SALT_BASE64"])
+        except KeyError as err:
+            raise ConfigError(f"Missing configuration value in .env file: {err}")
 
         # Derive the key
         kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=100_000, backend=default_backend())
         key = base64.urlsafe_b64encode(kdf.derive(password))
 
         f = Fernet(key)
-        password = f.decrypt(encoded_encrypted_password).decode()
+        try:
+            password = f.decrypt(encoded_encrypted_password).decode()
+        except InvalidToken as err:
+            activity.logger.error(f"Passed in non-encrypted password. Error: {err}")
+            raise
         return password
 
     def authenticate(self, creds: Creds) -> Account:
@@ -76,14 +81,34 @@ class ReasorsService:
         else:
             raise AuthenticationError(f"Authentication Error: {response.status_code} - {response.content}")
 
-    def get_unclipped_coupons(self, account: Account) -> CouponResponse:
-        return self.get_coupons(account=account, is_clippable=True, is_clipped=False)
+    def get_coupons(self, account: Account, is_clipped: bool) -> CouponResponse:
+        """Queries for available, unclipped coupons."""
+        url = (
+            f"{self.base_url}/1/offers?"
+            "app_key=reasors&"
+            f"is_clippable=true&"
+            f"is_clipped={is_clipped}&"
+            "limit=0&"
+            "offer_value_sort=desc&"
+            "sort=offer_value&"
+            f"store_id={account.store_id}&"
+            f"token={account.token}"
+        )
 
-    def get_clipped_coupons(self, account: Account) -> CouponResponse:
-        return self.get_coupons(account=account, is_clippable=True, is_clipped=True)
+        response = requests.get(url, verify=False, headers=self.headers)
+        if response.ok:
+            response_json = response.json()
+            return CouponResponse(
+                coupon_count=response_json["total"],  # Always exists.
+                # These properties may not exist if there are no coupons returned.
+                total_value=response_json.get("total_value", "$0"),
+                coupons=[Coupon(**item) for item in response_json.get("items", [])],
+            )
+        else:
+            raise OfferError(f"Offer API Error: {response.status_code} - {response.json()}")
 
     def get_redeemed_coupons(self, account: Account) -> CouponResponse:
-        """Contains the is_redeemed param, which, if present in get_coupons(), may return incomplete results."""
+        """Contains the is_redeemed param, which, if present in get_coupons(), may return incomplete results. """
         url = (
             f"{self.base_url}/1/offers?"
             f"app_key=reasors&"
@@ -103,33 +128,7 @@ class ReasorsService:
                 coupons=[Coupon(**item) for item in response_json.get("items", [])],
             )
         else:
-            OfferError(f"Offer API Error: {response.status_code} - {response.content}")
-
-    def get_coupons(self, account: Account, is_clippable: bool, is_clipped: bool) -> CouponResponse:
-        """Queries for available, unclipped coupons."""
-        url = (
-            f"{self.base_url}/1/offers?"
-            "app_key=reasors&"
-            f"is_clippable={is_clippable}&"
-            f"is_clipped={is_clipped}&"
-            "limit=0&"
-            "offer_value_sort=desc&"
-            "sort=offer_value&"
-            f"store_id={account.store_id}&"
-            f"token={account.token}"
-        )
-
-        response = requests.get(url, verify=False, headers=self.headers)
-        if response.ok:
-            response_json = response.json()
-            return CouponResponse(
-                coupon_count=response_json["total"],  # Always exists.
-                # These properties may not exist if there are no coupons returned.
-                total_value=response_json.get("total_value", "$0"),
-                coupons=[Coupon(**item) for item in response_json.get("items", [])],
-            )
-        else:
-            OfferError(f"Offer API Error: {response.status_code} - {response.content}")
+            raise OfferError(f"Offer API Error: {response.status_code} - {response.content}")
 
     def clip_coupons(self, clip_payload: ClipPayload) -> list[Coupon]:
         payload = {

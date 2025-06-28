@@ -69,10 +69,9 @@ class TestClipCouponsWorkflow(TemporalWorkflowTestCase):
         self.mock_start_child.return_value = asyncio.Future()
         # The parent workflow is set to abandon the child workflows. So we don't care what the return values are.
         self.mock_start_child.return_value.set_result(None)
-
         patcher = patch("temporalio.workflow.start_child_workflow", self.mock_start_child)
         self.start_child_patch = patcher.start()  # Begins redirecting/patching.
-        self.addCleanup(patcher.stop)  # Adds cleanup, so after these tests run, the patch is removed.
+        self.addCleanup(patcher.stop)  # Adds cleanup, so after these tests run, the patch is removed automatically.
 
     async def test_clip_coupons_workflow(self):
         """ Tests the ClipCouponsWorkflow with mocked activities. """
