@@ -19,6 +19,7 @@ class ReasorsActivities:
         try:
             with open("accounts.json", 'r') as f:
                 return json.load(f)["accounts"]  # type: dict[str, str]
+
         except FileNotFoundError as err:
             activity.logger.exception(
                 f"Missing 'accounts.json' file in project directory. Error: {err}"
@@ -53,6 +54,7 @@ class ReasorsActivities:
     async def get_available_coupons(self, account: Account) -> CouponResponse:
         try:
             coupon_response: CouponResponse = self.reasors_service.get_coupons(account=account, is_clipped=False)
+            # TODO: Replace section with logging.
             if coupon_response.coupon_count > 0:
                 print(f"Found {coupon_response.coupon_count} coupons!")
             else:

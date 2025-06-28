@@ -5,8 +5,8 @@ from unittest.mock import patch, mock_open
 from temporalio.testing import ActivityEnvironment
 
 from coupon_clipper.activities import ReasorsActivities
-from coupon_clipper.exceptions import AuthenticationError
-from coupon_clipper.shared import Creds, Account
+from coupon_clipper.exceptions import AuthenticationError, OfferError
+from coupon_clipper.shared import Creds, Account, CouponResponse, Coupon
 
 
 class TestReasorsActivities(unittest.IsolatedAsyncioTestCase):
@@ -18,6 +18,9 @@ class TestReasorsActivities(unittest.IsolatedAsyncioTestCase):
         self.account = Account(
             token="asd123aj1gds1df2f1s12s1f1", store_id="1077", store_card_number="121312577181273654"
         )
+        self.coupon = Coupon(id="ICE_1234_123123")
+        self.coupon_list = [self.coupon, Coupon(id="ICE_1234_1231234"), Coupon(id="ICE_1234_1231236")]
+
 
     @patch("coupon_clipper.activities.open", new_callable=mock_open, read_data="[]")
     async def test_get_accounts_json_success(self, mock_file):
@@ -112,5 +115,62 @@ class TestReasorsActivities(unittest.IsolatedAsyncioTestCase):
         # Act/Assert
         with self.assertRaises(Exception):
             await self.activity_env.run(self.service.auth, self.creds)
+
+        # TODO: Add assert for validating exception is logged at the activity level.
+
+    @patch("coupon_clipper.activities.ReasorsService.get_coupons")
+    async def test_get_available_coupons_success(self, get_coupons_mock):
+        """ Basic success test case. The underlying method is tested in more detail elsewhere."""
+        # Arrange
+        get_coupons_mock.return_value = CouponResponse(
+            total_value="$1,000.00",
+            coupon_count=len(self.coupon_list),
+            coupons=self.coupon_list
+        )
+
+        # Act
+        output: CouponResponse = await self.activity_env.run(self.service.get_available_coupons, self.account)
+
+        # Assert
+        self.assertIs(type(output), CouponResponse)
+        self.assertEqual(len(output.coupons), len(self.coupon_list))
+
+    @patch("coupon_clipper.activities.ReasorsService.get_coupons")
+    async def test_get_available_coupons_success_no_coupons(self, get_coupons_mock):
+        """ Basic success test case. The underlying method is tested in more detail elsewhere."""
+        # Arrange
+        get_coupons_mock.return_value = CouponResponse(
+            total_value="$0",
+            coupon_count=0,
+            coupons=[]
+        )
+
+        # Act
+        output: CouponResponse = await self.activity_env.run(self.service.get_available_coupons, self.account)
+
+        # Assert
+        self.assertIs(type(output), CouponResponse)
+        self.assertEqual(len(output.coupons), 0)
+
+    @patch("coupon_clipper.activities.ReasorsService.get_coupons")
+    async def test_get_available_coupons_OfferError(self, get_coupons_mock):
+        # Arrange
+        get_coupons_mock.side_effect = OfferError("Get Coupons API Error: ")
+
+        # Act/Assert
+        with self.assertRaises(OfferError):
+            await self.activity_env.run(self.service.get_available_coupons, self.account)
+
+        # TODO: Add assert for validating exception is logged at the activity level"
+
+    @patch("coupon_clipper.activities.ReasorsService.get_coupons")
+    async def test_get_available_coupons_Exception(self, get_coupons_mock):
+        """ Test for an unhandled exception. """
+        # Arrange
+        get_coupons_mock.side_effect = ArithmeticError("Unhandled Exception!")
+
+        # Act/Assert
+        with self.assertRaises(Exception):
+            await self.activity_env.run(self.service.get_available_coupons, self.account)
 
         # TODO: Add assert for validating exception is logged at the activity level.
