@@ -3,8 +3,8 @@ from unittest.mock import patch
 
 from cryptography.fernet import InvalidToken
 
-from coupon_clipper.exceptions import ConfigError
-from coupon_clipper.reasors_service import ReasorsService
+from app.exceptions import ConfigError
+from app.services.reasors_service import ReasorsService
 
 
 class TestReasorsServiceDecryptPassword(unittest.TestCase):

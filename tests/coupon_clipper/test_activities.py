@@ -4,9 +4,9 @@ from unittest.mock import patch, mock_open
 
 from temporalio.testing import ActivityEnvironment
 
-from coupon_clipper.activities import ReasorsActivities
-from coupon_clipper.exceptions import AuthenticationError, OfferError
-from coupon_clipper.shared import Creds, Account, CouponResponse, Coupon
+from app.activities.reasors_activities import ReasorsActivities
+from app.exceptions import AuthenticationError, OfferError
+from app.models.schemas import Creds, Account, CouponResponse, Coupon
 
 
 class TestReasorsActivities(unittest.IsolatedAsyncioTestCase):

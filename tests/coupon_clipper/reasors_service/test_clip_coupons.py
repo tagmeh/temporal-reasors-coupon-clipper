@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import patch, MagicMock
 
-from coupon_clipper.reasors_service import ReasorsService
-from coupon_clipper.shared import Coupon, Account
+from app.services.reasors_service import ReasorsService
+from app.models.schemas import Coupon, Account
 
 
 class TestReasorsServiceClipCoupons(unittest.TestCase):

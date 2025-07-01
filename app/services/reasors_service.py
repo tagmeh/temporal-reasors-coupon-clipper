@@ -10,10 +10,10 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from dotenv import dotenv_values
 from temporalio import activity
 
-from coupon_clipper.db_models import Account
-from coupon_clipper.exceptions import AuthenticationError, OfferError, ConfigError
-from coupon_clipper.shared import CouponResponse, Coupon, AccountSession
-from database.database_service import get_session
+from app.models.db import Account
+from app.exceptions import AuthenticationError, OfferError, ConfigError
+from app.models.schemas import CouponResponse, Coupon, AccountSession
+from app.services.database_service import get_session
 
 
 @dataclass
