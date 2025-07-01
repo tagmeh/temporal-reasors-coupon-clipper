@@ -8,7 +8,8 @@ Base = declarative_base()
 
 
 class Account(Base):
-    """ Account information for authentication. """
+    """Account information for authentication."""
+
     __tablename__ = "accounts"
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, index=True)
@@ -20,7 +21,8 @@ class Account(Base):
 
 
 class RedeemedCoupon(Base):
-    """ Contains a relationship of coupons that have been redeemed and by which user. """
+    """Contains a relationship of coupons that have been redeemed and by which user."""
+
     __tablename__ = "redeemed_coupons"
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("accounts.id"), index=True)
@@ -33,7 +35,8 @@ class RedeemedCoupon(Base):
 
 
 class DBCoupon(Base):
-    """ Coupon object """
+    """Coupon object"""
+
     __tablename__ = "coupons"
     id = Column(Integer, primary_key=True)
     coupon_id = Column(String, unique=True, index=True)

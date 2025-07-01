@@ -22,10 +22,7 @@ class ClipCouponsChildWorkflow:
 
         # Use DB Account to authenticate and return an AccountSession object.
         account_session: AccountSession = await workflow.execute_activity(
-            ReasorsActivities.auth,
-            account_id,
-            start_to_close_timeout=timedelta(seconds=30),
-            retry_policy=retry_policy
+            ReasorsActivities.auth, account_id, start_to_close_timeout=timedelta(seconds=30), retry_policy=retry_policy
         )
 
         # Query the clippable coupons using the AccountSession
@@ -84,9 +81,7 @@ class ClipCouponsWorkflow:
 
         # Query the database Account table and get only the account IDs.
         account_ids: list[int] = await workflow.execute_activity(
-            ReasorsActivities.get_account_ids,
-            start_to_close_timeout=timedelta(seconds=30),
-            retry_policy=retry_policy
+            ReasorsActivities.get_account_ids, start_to_close_timeout=timedelta(seconds=30), retry_policy=retry_policy
         )
 
         # Spins up a child workflow for each ID found in the database table Account

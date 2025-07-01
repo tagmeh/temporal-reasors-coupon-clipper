@@ -17,7 +17,7 @@ class TestReasorsServiceDecryptPassword(unittest.TestCase):
     def setUp(self):
         self.config = {
             "DECRYPTION_MASTER_KEY": "CoolMasterKeyPassword",
-            "PASSWORD_SALT_BASE64": "3iAnyqPkGBpsECHJ7wmgykyM1vNfszt6HVy9gzKKzHY="
+            "PASSWORD_SALT_BASE64": "3iAnyqPkGBpsECHJ7wmgykyM1vNfszt6HVy9gzKKzHY=",
         }
         patcher = patch("coupon_clipper.reasors_service.dotenv_values", return_value=self.config)
         self.addCleanup(patcher.stop)
@@ -26,7 +26,9 @@ class TestReasorsServiceDecryptPassword(unittest.TestCase):
         self.service = ReasorsService()
 
         self.test_password = "TestPassword!"
-        self.encrypted_test_password = "gAAAAABoXitz81ntsDFH4PCj1Oeg8qBhpQfq-Bl0GmVAVi38lA0B4TFjfXWVtucPZFPos9R1ZzS7PdCJUHTdSNdvP5mnq3zOGw=="
+        self.encrypted_test_password = (
+            "gAAAAABoXitz81ntsDFH4PCj1Oeg8qBhpQfq-Bl0GmVAVi38lA0B4TFjfXWVtucPZFPos9R1ZzS7PdCJUHTdSNdvP5mnq3zOGw=="
+        )
 
     def test_decrypt_password_success(self):
         # Act

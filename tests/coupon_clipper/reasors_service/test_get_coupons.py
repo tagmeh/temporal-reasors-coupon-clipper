@@ -17,9 +17,7 @@ class TestReasorsServiceGetCoupons(unittest.TestCase):
     def setUp(self):
         self.service = ReasorsService()
         self.account: Account = Account(
-            token="1a2b3c4d5e6f7g8h9i10j11k12l",
-            store_id="1234",
-            store_card_number="123456789011121314151617181920"
+            token="1a2b3c4d5e6f7g8h9i10j11k12l", store_id="1234", store_card_number="123456789011121314151617181920"
         )
 
         # Minimized payload from Reasors API call.
@@ -27,19 +25,19 @@ class TestReasorsServiceGetCoupons(unittest.TestCase):
             "total": 100,
             "total_value": "$1,000,000.00",
             "items": [{"id": "ICE_1234_123123"}, {"id": "ICE_1234_123124"}, {"id": "ICE_1234_123125"}],
-            'card_number': '400001234567',
-            'card_number_barcode': '400001234567'
+            "card_number": "400001234567",
+            "card_number_barcode": "400001234567",
         }
         self.no_coupons_response = {
             "total": 100,
             # If no coupons, "total_value" and "items" are simply not returned.
-            'card_number': '400001234567',
-            'card_number_barcode': '400001234567'
+            "card_number": "400001234567",
+            "card_number_barcode": "400001234567",
         }
 
     @patch("coupon_clipper.reasors_service.requests.get")
     def test_get_coupons_success(self, get_mock):
-        """ Classic successful call that returns coupons. """
+        """Classic successful call that returns coupons."""
         # Arrange
         # Mock requests.get
         response_mock = MagicMock()
@@ -61,14 +59,14 @@ class TestReasorsServiceGetCoupons(unittest.TestCase):
 
     @patch("coupon_clipper.reasors_service.requests.get")
     def test_get_coupons_bad_token(self, get_mock):
-        """ API call with a bad token. Returns a 400, no coupons. """
+        """API call with a bad token. Returns a 400, no coupons."""
         # Arrange
         # Mock requests.get
         response_mock = MagicMock()
         # Return error based on actual response.
         response_mock.ok = False
         response_mock.status_code = 400
-        response_mock.json.return_value = {'error_code': 'sign_out_required', 'error_message': 'Please log in again.'}
+        response_mock.json.return_value = {"error_code": "sign_out_required", "error_message": "Please log in again."}
 
         get_mock.return_value = response_mock
 
@@ -80,7 +78,7 @@ class TestReasorsServiceGetCoupons(unittest.TestCase):
 
     @patch("coupon_clipper.reasors_service.requests.get")
     def test_get_coupons_no_coupons(self, get_mock):
-        """ Successful API call that returns no coupons. """
+        """Successful API call that returns no coupons."""
         # Arrange
         # Mock requests.get
         response_mock = MagicMock()

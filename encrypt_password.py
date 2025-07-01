@@ -49,10 +49,7 @@ def encrypt_password(config: dict[str, Any], input_password: str) -> str:
 
 def insert_into_database(username: str, password: str) -> int:
     session = get_session()
-    account = Account(
-        username=username,
-        password=password
-    )
+    account = Account(username=username, password=password)
     session.add(account)
     session.commit()
     return account.id
@@ -64,9 +61,9 @@ if __name__ == "__main__":
     username = input("Username (Email): ")
     input_password = input("Plaintext Password: ")
     if not username or not input_password:
-        print('Please enter your username and password.')
+        print("Please enter your username and password.")
         exit(1)
     result = encrypt_password(config=config, input_password=input_password)
     print(result)
     account_id: int = insert_into_database(username=username, password=result)
-    print(f'Username and Password stored in the database. ID: {account_id}')
+    print(f"Username and Password stored in the database. ID: {account_id}")

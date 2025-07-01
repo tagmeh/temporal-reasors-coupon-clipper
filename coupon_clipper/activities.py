@@ -65,7 +65,9 @@ class ReasorsActivities:
     @activity.defn
     async def get_available_coupons(self, account_session: AccountSession) -> CouponResponse:
         try:
-            coupon_response: CouponResponse = self.reasors_service.get_coupons(account_session=account_session, is_clipped=False)
+            coupon_response: CouponResponse = self.reasors_service.get_coupons(
+                account_session=account_session, is_clipped=False
+            )
             # TODO: Replace section with logging.
             if coupon_response.coupon_count > 0:
                 print(f"Found {coupon_response.coupon_count} coupons!")
@@ -100,7 +102,7 @@ class ReasorsActivities:
                             start_date=coupon.start_date,
                             finish_date=coupon.finish_date,
                             clip_start_date=coupon.clip_start_date,
-                            clip_end_date=coupon.clip_end_date
+                            clip_end_date=coupon.clip_end_date,
                         )
                         session.add(db_coupon)
                         session.flush()
@@ -114,7 +116,9 @@ class ReasorsActivities:
     @activity.defn
     async def clip_coupon(self, clip_payload: ClipPayload) -> Coupon:
         try:
-            return self.reasors_service.clip_coupon(account_session=clip_payload.account_session, coupon=clip_payload.coupon)
+            return self.reasors_service.clip_coupon(
+                account_session=clip_payload.account_session, coupon=clip_payload.coupon
+            )
         except OfferError:
             raise
         except Exception as err:

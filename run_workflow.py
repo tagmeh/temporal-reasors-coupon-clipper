@@ -22,13 +22,10 @@ async def main() -> None:
                 action=ScheduleActionStartWorkflow(
                     "ClipCouponsWorkflow",
                     id="Reasors Coupon Clipper Parent",
-                    task_queue=REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME
+                    task_queue=REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME,
                 ),
-                spec=ScheduleSpec(
-                    cron_expressions=["0 0,6,12,18 * * *"],
-                    time_zone_name="US/Central"
-                )
-            )
+                spec=ScheduleSpec(cron_expressions=["0 0,6,12,18 * * *"], time_zone_name="US/Central"),
+            ),
         )
 
         # await client.execute_workflow(

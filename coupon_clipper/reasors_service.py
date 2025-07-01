@@ -94,7 +94,9 @@ class ReasorsService:
                 store_card_number=output.get("store_card_number", ""),
             )
         else:
-            raise AuthenticationError(f"Authentication for '{account.username}' Error: {response.status_code} - {response.content}")
+            raise AuthenticationError(
+                f"Authentication for '{account.username}' Error: {response.status_code} - {response.content}"
+            )
 
     def get_coupons(self, account_session: AccountSession, is_clipped: bool) -> CouponResponse:
         """Queries for available, unclipped coupons."""
@@ -123,7 +125,7 @@ class ReasorsService:
             raise OfferError(f"Get Coupons API Error: {response.status_code} - {response.json()}")
 
     def get_redeemed_coupons(self, account_session: AccountSession) -> CouponResponse:
-        """Contains the is_redeemed param, which, if present in get_coupons(), may return incomplete results. """
+        """Contains the is_redeemed param, which, if present in get_coupons(), may return incomplete results."""
         url = (
             f"{self.base_url}/1/offers?"
             f"app_key=reasors&"
@@ -144,7 +146,6 @@ class ReasorsService:
             )
         else:
             raise OfferError(f"Redeemed API Error: {response.status_code} - {response.content}")
-
 
     def clip_coupon(self, account_session: AccountSession, coupon: Coupon) -> Coupon:
         """
@@ -167,8 +168,7 @@ class ReasorsService:
 
         if response.ok:
             print(  # TODO: Use Temporal's logging. Also, find out where these logs exist in the GUI.
-                f"Clipped coupon {coupon.id}. "
-                f"Value: {coupon.offer_value} for {coupon.brand}: {coupon.description}"
+                f"Clipped coupon {coupon.id}. " f"Value: {coupon.offer_value} for {coupon.brand}: {coupon.description}"
             )
             # Updating is_clipped here, but we could just re-query the coupons to get the same value.
             coupon.is_clipped = True

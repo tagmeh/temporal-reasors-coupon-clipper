@@ -20,9 +20,7 @@ async def main() -> None:
     prometheus_runtime = Runtime(telemetry=TelemetryConfig(metrics=PrometheusConfig(bind_address="0.0.0.0:7280")))
 
     client: Client = await Client.connect(
-        url, namespace=config["NAMESPACE"],
-        data_converter=pydantic_data_converter,
-        runtime=prometheus_runtime
+        url, namespace=config["NAMESPACE"], data_converter=pydantic_data_converter, runtime=prometheus_runtime
     )
     # Run the worker
     activities = ReasorsActivities()

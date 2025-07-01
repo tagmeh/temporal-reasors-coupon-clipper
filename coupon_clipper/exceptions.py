@@ -57,6 +57,7 @@ class OfferError(Exception):
         self.message: str = message
         super().__init__(self.message)
 
+
 @dataclass
 class ConfigError(Exception):
     """Exception for handling errors related to the .env file/dotenv config.

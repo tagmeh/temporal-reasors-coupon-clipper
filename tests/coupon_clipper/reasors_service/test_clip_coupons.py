@@ -13,9 +13,7 @@ class TestReasorsServiceClipCoupons(unittest.TestCase):
     def setUp(self):
         self.service = ReasorsService()
         self.account: Account = Account(
-            token="1a2b3c4d5e6f7g8h9i10j11k12l",
-            store_id="1234",
-            store_card_number="123456789011121314151617181920"
+            token="1a2b3c4d5e6f7g8h9i10j11k12l", store_id="1234", store_card_number="123456789011121314151617181920"
         )
 
         self.unclipped_coupon = Coupon(id="ICE_1234_123123", is_clipped=False)
@@ -47,7 +45,7 @@ class TestReasorsServiceClipCoupons(unittest.TestCase):
         response_mock = MagicMock()
         response_mock.ok = False
         response_mock.status_code = 404
-        response_mock.content = b'NotFound'
+        response_mock.content = b"NotFound"
 
         post_mock.return_value = response_mock
 
