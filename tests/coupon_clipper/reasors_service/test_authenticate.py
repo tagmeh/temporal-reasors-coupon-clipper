@@ -1,9 +1,8 @@
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch, MagicMock
 
-from coupon_clipper.exceptions import AuthenticationError
-from coupon_clipper.reasors_service import ReasorsService
-from coupon_clipper.shared import AccountSession
+from app.exceptions import AuthenticationError
+from app.services.reasors_service import ReasorsService
 
 
 class TestReasorsServiceAuthenticate(unittest.TestCase):

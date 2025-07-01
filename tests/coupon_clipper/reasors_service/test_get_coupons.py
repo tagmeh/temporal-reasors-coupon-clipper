@@ -1,9 +1,9 @@
 import unittest
 from unittest.mock import patch, MagicMock
 
-from coupon_clipper.exceptions import OfferError
-from coupon_clipper.reasors_service import ReasorsService
-from coupon_clipper.shared import Account, Coupon, CouponResponse
+from app.exceptions import OfferError
+from app.services.reasors_service import ReasorsService
+from app.models.schemas import Account, Coupon, CouponResponse
 
 
 class TestReasorsServiceGetCoupons(unittest.TestCase):

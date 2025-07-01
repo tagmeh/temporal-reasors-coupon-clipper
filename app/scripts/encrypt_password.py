@@ -9,8 +9,8 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from dotenv import dotenv_values
 
-from coupon_clipper.db_models import Account
-from database.database_service import init_db, get_session
+from app.models.db import Account
+from app.services.database_service import init_db, get_session
 
 logging.basicConfig(level=logging.INFO)
 
@@ -57,7 +57,7 @@ def insert_into_database(username: str, password: str) -> int:
 
 if __name__ == "__main__":
     init_db()
-    config = dotenv_values(".env")
+    config = dotenv_values("../../.env")
     username = input("Username (Email): ")
     input_password = input("Plaintext Password: ")
     if not username or not input_password:

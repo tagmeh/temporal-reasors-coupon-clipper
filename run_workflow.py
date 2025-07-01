@@ -1,11 +1,12 @@
 import asyncio
 import traceback
 
+from datetime import UTC
 from dotenv import dotenv_values
 from temporalio.client import Client, WorkflowFailureError, Schedule, ScheduleActionStartWorkflow, ScheduleSpec
 from temporalio.contrib.pydantic import pydantic_data_converter
 
-from coupon_clipper.shared import REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME
+from app.models.schemas import REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME
 
 config = dotenv_values(".env")
 
@@ -16,23 +17,24 @@ async def main() -> None:
     client: Client = await Client.connect(url, namespace=config["NAMESPACE"], data_converter=pydantic_data_converter)
 
     try:
-        await client.create_schedule(
-            "clip-coupons-workflow",
-            Schedule(
-                action=ScheduleActionStartWorkflow(
-                    "ClipCouponsWorkflow",
-                    id="Reasors Coupon Clipper Parent",
-                    task_queue=REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME,
-                ),
-                spec=ScheduleSpec(cron_expressions=["0 0,6,12,18 * * *"], time_zone_name="US/Central"),
-            ),
+        # if cron_schedule := config.get('CRON_SCHEDULE'):
+        #     await client.create_schedule(
+        #         "clip-coupons-workflow",
+        #         Schedule(
+        #             action=ScheduleActionStartWorkflow(
+        #                 "ClipCouponsWorkflow",
+        #                 id="Reasors Coupon Clipper Parent",
+        #                 task_queue=REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME,
+        #             ),
+        #             spec=ScheduleSpec(cron_expressions=[cron_schedule], time_zone_name=config.get('TIME_ZONE', UTC)),
+        #         ),
+        #     )
+        # else:
+        await client.execute_workflow(
+            "ClipCouponsWorkflow",
+            id="Reasors Coupon Clipper Parent",
+            task_queue=REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME
         )
-
-        # await client.execute_workflow(
-        #     "ClipCouponsWorkflow",
-        #     id="Reasors Coupon Clipper Parent",
-        #     task_queue=REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME,
-        # )
     except WorkflowFailureError:
         print("Got expected exception: ", traceback.format_exc())
 

@@ -2,12 +2,12 @@ import json
 
 from temporalio import activity
 
-from coupon_clipper.db_models import Account, DBCoupon
-from database.database_service import get_session, init_db
+from app.models.db import Account, DBCoupon
+from app.services.database_service import get_session, init_db
 
-from coupon_clipper.exceptions import AuthenticationError, OfferError
-from coupon_clipper.reasors_service import ReasorsService
-from coupon_clipper.shared import AccountSession, CouponResponse, ClipPayload, Coupon
+from app.exceptions import AuthenticationError, OfferError
+from app.services.reasors_service import ReasorsService
+from app.models.schemas import AccountSession, CouponResponse, ClipPayload, Coupon
 
 
 class ReasorsActivities:
