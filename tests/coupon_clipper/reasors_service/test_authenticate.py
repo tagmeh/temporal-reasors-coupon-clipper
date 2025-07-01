@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch, MagicMock
 
 from coupon_clipper.exceptions import AuthenticationError
 from coupon_clipper.reasors_service import ReasorsService
-from coupon_clipper.shared import Creds, Account
+from coupon_clipper.shared import AccountSession
 
 
 class TestReasorsServiceAuthenticate(unittest.TestCase):

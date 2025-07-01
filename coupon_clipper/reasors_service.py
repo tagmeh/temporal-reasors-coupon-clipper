@@ -10,8 +10,10 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from dotenv import dotenv_values
 from temporalio import activity
 
+from coupon_clipper.db_models import Account
 from coupon_clipper.exceptions import AuthenticationError, OfferError, ConfigError
-from coupon_clipper.shared import Account, Creds, CouponResponse, Coupon
+from coupon_clipper.shared import CouponResponse, Coupon, AccountSession
+from database.database_service import get_session
 
 
 @dataclass
@@ -35,7 +37,7 @@ class ReasorsService:
             "sec-fetch-site": "cross-site",
             "sec-gpc": "1",
         }
-        self.config = dotenv_values("../.env")
+        self.config = dotenv_values(".env")
 
     def decrypt_password(self, encrypted_password: str) -> str:
         encoded_encrypted_password = encrypted_password.encode()
@@ -57,31 +59,44 @@ class ReasorsService:
             raise
         return password
 
-    def authenticate(self, creds: Creds) -> Account:
-        url = f"{self.base_url}/2/users/me/sessions"
+    @staticmethod
+    def get_db_account(account_id: int) -> Account:
+        """
+        Queries the Account database for the username and encrypted password.
+        This is done within an activity (and without passing it into or out of an activity) to avoid logging the
+        user credentials, specifically the encrypted password.
+        """
+        # TODO: Add database specific exception handling.
+        session = get_session()
+        return session.query(Account).filter(Account.id == account_id).one()
+
+    def authenticate(self, account_id: int) -> AccountSession:
+        account: Account = self.get_db_account(account_id=account_id)
 
         payload = {
             "app_key": "reasors",
-            "email": creds.username,
-            "password": self.decrypt_password(creds.password),
+            "email": account.username,
+            "password": self.decrypt_password(account.password),
             "new_session_on_login": True,
             "referrer": "https://reasors.com/my-account#!/login?next=%2Fmy-account",
             "utc": int(datetime.datetime.now(datetime.UTC).timestamp() * 1000),
         }
 
-        response = requests.post(url=url, headers=self.headers, data=payload)
+        response = requests.post(url=f"{self.base_url}/2/users/me/sessions", headers=self.headers, data=payload)
         if response.ok:
-            print(f"Authenticated")  # {creds.username}
+            print(f"Authenticated {account.username}")
             output: dict[str, str] = response.json()
-            return Account(
+            return AccountSession(
+                db_id=account.id,
+                username=account.username,
                 token=output["token"],  # Always exists, not technically tied to authentication.
-                store_id=output.get("store_id", ""),
+                store_id=output.get("selected_store_id", ""),  # Different from store_id
                 store_card_number=output.get("store_card_number", ""),
             )
         else:
-            raise AuthenticationError(f"Authentication Error: {response.status_code} - {response.content}")
+            raise AuthenticationError(f"Authentication for '{account.username}' Error: {response.status_code} - {response.content}")
 
-    def get_coupons(self, account: Account, is_clipped: bool) -> CouponResponse:
+    def get_coupons(self, account_session: AccountSession, is_clipped: bool) -> CouponResponse:
         """Queries for available, unclipped coupons."""
         url = (
             f"{self.base_url}/1/offers?"
@@ -91,8 +106,8 @@ class ReasorsService:
             "limit=0&"
             "offer_value_sort=desc&"
             "sort=offer_value&"
-            f"store_id={account.store_id}&"
-            f"token={account.token}"
+            f"store_id={account_session.store_id}&"
+            f"token={account_session.token}"
         )
 
         response = requests.get(url, verify=False, headers=self.headers)
@@ -107,7 +122,7 @@ class ReasorsService:
         else:
             raise OfferError(f"Get Coupons API Error: {response.status_code} - {response.json()}")
 
-    def get_redeemed_coupons(self, account: Account) -> CouponResponse:
+    def get_redeemed_coupons(self, account_session: AccountSession) -> CouponResponse:
         """Contains the is_redeemed param, which, if present in get_coupons(), may return incomplete results. """
         url = (
             f"{self.base_url}/1/offers?"
@@ -115,8 +130,8 @@ class ReasorsService:
             f"is_redeemed=true&"
             f"offer_value_sort=desc&"
             f"sort=offer_value&"
-            f"store_id={account.store_id}&"
-            f"token={account.token}"
+            f"store_id={account_session.store_id}&"
+            f"token={account_session.token}"
         )
         response = requests.get(url, verify=False, headers=self.headers)
         if response.ok:
@@ -131,7 +146,7 @@ class ReasorsService:
             raise OfferError(f"Redeemed API Error: {response.status_code} - {response.content}")
 
 
-    def clip_coupon(self, account: Account, coupon: Coupon) -> Coupon:
+    def clip_coupon(self, account_session: AccountSession, coupon: Coupon) -> Coupon:
         """
         Attempts to clip a coupon.
         Clipping a clipped coupon does not fail.
@@ -139,8 +154,8 @@ class ReasorsService:
         payload = {
             "app_key": "reasors",
             "referrer": "https://reasors.com/digital-coupons",
-            "store_id": str(account.store_id),
-            "token": account.token,
+            "store_id": str(account_session.store_id),
+            "token": account_session.token,
             "utc": int(datetime.datetime.now(datetime.UTC).timestamp() * 1000),
         }
 
