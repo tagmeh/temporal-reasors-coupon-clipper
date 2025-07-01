@@ -4,11 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-temporalio = "*"
 requests = "*"
 cryptography = "*"
 python-dotenv = "*"
 pydantic = "*"
+temporalio = {extras = ["opentelementry"], version = "*"}
+prometheus-client = "*"
+sqlalchemy = "*"
 
 [dev-packages]
 black = "*"

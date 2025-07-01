@@ -13,6 +13,7 @@ class TemporalWorkflowTestCase(unittest.IsolatedAsyncioTestCase):
     """
     Sets up the environment to test Temporal Workflows.
     """
+
     WORKFLOWS = []
     ACTIVITIES = []
 
@@ -47,7 +48,7 @@ class TemporalWorkflowTestCase(unittest.IsolatedAsyncioTestCase):
 
 mocked_get_accounts_json_output = [
     {"username": "Fry@planetexpress.com", "password": "encrypted_password"},
-    {"username": "Leela@planetexpress.com", "password": "encrypted_password"}
+    {"username": "Leela@planetexpress.com", "password": "encrypted_password"},
 ]
 
 
@@ -74,7 +75,7 @@ class TestClipCouponsWorkflow(TemporalWorkflowTestCase):
         self.addCleanup(patcher.stop)  # Adds cleanup, so after these tests run, the patch is removed automatically.
 
     async def test_clip_coupons_workflow(self):
-        """ Tests the ClipCouponsWorkflow with mocked activities. """
+        """Tests the ClipCouponsWorkflow with mocked activities."""
 
         result = await self.env.client.execute_workflow(
             workflow="ClipCouponsWorkflow",
@@ -83,8 +84,14 @@ class TestClipCouponsWorkflow(TemporalWorkflowTestCase):
         )
 
         # Asserts the Workflow output.
-        self.assertEqual(result, f"Finished parent workflow. Ran for {len(mocked_get_accounts_json_output)} accounts.",
-                         f"Actual: {result}")
+        self.assertEqual(
+            result,
+            f"Finished parent workflow. Ran for {len(mocked_get_accounts_json_output)} accounts.",
+            f"Actual: {result}",
+        )
         # Asserts the correct number of child workflows were created.
-        self.assertEqual(self.mock_start_child.call_count, len(mocked_get_accounts_json_output),
-                         "A child job is expected for each account returned from the get_accounts_json activity.")
+        self.assertEqual(
+            self.mock_start_child.call_count,
+            len(mocked_get_accounts_json_output),
+            "A child job is expected for each account returned from the get_accounts_json activity.",
+        )

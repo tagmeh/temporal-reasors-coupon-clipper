@@ -21,7 +21,6 @@ class TestReasorsActivities(unittest.IsolatedAsyncioTestCase):
         self.coupon = Coupon(id="ICE_1234_123123")
         self.coupon_list = [self.coupon, Coupon(id="ICE_1234_1231234"), Coupon(id="ICE_1234_1231236")]
 
-
     @patch("coupon_clipper.activities.open", new_callable=mock_open, read_data="[]")
     async def test_get_accounts_json_success(self, mock_file):
         # Arrange
@@ -108,7 +107,7 @@ class TestReasorsActivities(unittest.IsolatedAsyncioTestCase):
 
     @patch("coupon_clipper.activities.ReasorsService.authenticate")
     async def test_auth_Exception(self, authenticate_mock):
-        """ Test for an unhandled exception. """
+        """Test for an unhandled exception."""
         # Arrange
         authenticate_mock.side_effect = ArithmeticError("Unhandled Exception!")
 
@@ -120,12 +119,10 @@ class TestReasorsActivities(unittest.IsolatedAsyncioTestCase):
 
     @patch("coupon_clipper.activities.ReasorsService.get_coupons")
     async def test_get_available_coupons_success(self, get_coupons_mock):
-        """ Basic success test case. The underlying method is tested in more detail elsewhere."""
+        """Basic success test case. The underlying method is tested in more detail elsewhere."""
         # Arrange
         get_coupons_mock.return_value = CouponResponse(
-            total_value="$1,000.00",
-            coupon_count=len(self.coupon_list),
-            coupons=self.coupon_list
+            total_value="$1,000.00", coupon_count=len(self.coupon_list), coupons=self.coupon_list
         )
 
         # Act
@@ -137,13 +134,9 @@ class TestReasorsActivities(unittest.IsolatedAsyncioTestCase):
 
     @patch("coupon_clipper.activities.ReasorsService.get_coupons")
     async def test_get_available_coupons_success_no_coupons(self, get_coupons_mock):
-        """ Basic success test case. The underlying method is tested in more detail elsewhere."""
+        """Basic success test case. The underlying method is tested in more detail elsewhere."""
         # Arrange
-        get_coupons_mock.return_value = CouponResponse(
-            total_value="$0",
-            coupon_count=0,
-            coupons=[]
-        )
+        get_coupons_mock.return_value = CouponResponse(total_value="$0", coupon_count=0, coupons=[])
 
         # Act
         output: CouponResponse = await self.activity_env.run(self.service.get_available_coupons, self.account)
@@ -165,7 +158,7 @@ class TestReasorsActivities(unittest.IsolatedAsyncioTestCase):
 
     @patch("coupon_clipper.activities.ReasorsService.get_coupons")
     async def test_get_available_coupons_Exception(self, get_coupons_mock):
-        """ Test for an unhandled exception. """
+        """Test for an unhandled exception."""
         # Arrange
         get_coupons_mock.side_effect = ArithmeticError("Unhandled Exception!")
 

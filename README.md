@@ -40,7 +40,7 @@ To add your Reasors.com account:
 3. Enter your Reasors.com password (in plaintext) when prompted. The script will output an encrypted password.
 4. Copy the encrypted password.
 
-### 6. Add Your Account
+### 6. Add Your Account (THIS IS CHANGING TO USE A DATABASE. PENDING REVISIONS.)
 Edit `accounts.json` (see `accounts-example.json`):
 ```json
 {

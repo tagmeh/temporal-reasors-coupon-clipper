@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch, MagicMock
 
 from coupon_clipper.exceptions import AuthenticationError
 from coupon_clipper.reasors_service import ReasorsService
-from coupon_clipper.shared import Creds, Account
+from coupon_clipper.shared import AccountSession
 
 
 class TestReasorsServiceAuthenticate(unittest.TestCase):
@@ -16,7 +16,9 @@ class TestReasorsServiceAuthenticate(unittest.TestCase):
 
         # Mock the ReasorsService.decrypt_password method for all tests.
         self.decrypted_password = "decrypted_password"
-        patcher = patch("coupon_clipper.reasors_service.ReasorsService.decrypt_password", return_value=self.decrypted_password)
+        patcher = patch(
+            "coupon_clipper.reasors_service.ReasorsService.decrypt_password", return_value=self.decrypted_password
+        )
         self.addCleanup(patcher.stop)
         self.decrypt_password_mock = patcher.start()
 
@@ -64,4 +66,3 @@ class TestReasorsServiceAuthenticate(unittest.TestCase):
 
         # Verify/Require that the decrypt_password method was used.
         self.decrypt_password_mock.assert_called_once_with(self.creds.password)
-

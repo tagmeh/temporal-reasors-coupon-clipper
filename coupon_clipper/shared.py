@@ -9,29 +9,14 @@ from coupon_clipper.exceptions import MissingAccountInfoError
 REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME = "REASORS_COUPON_CLIPPER_TASK_QUEUE"
 
 
-class Creds(BaseModel):
+class AccountSession(BaseModel):
     """
-    Initial user/pass passed in payload.
-    Password is encrypted. The password is decrypted immediately before use,
-    and no object is updated with it's decrypted value.
-    """
-
-    username: str
-    password: str
-
-    @model_validator(mode="after")
-    def check_required_inputs(self) -> Self:
-        if not self.username or not self.password:
-            raise ValueError("Username and password must be provided.")
-        return self
-
-
-class Account(BaseModel):
-    """
-    An account representation. Technically authenticated with the server, however, if the store_id and store_card_number
-    are missing, then we don't have enough information to query or clip coupons.
+    An authenticated account representation. Technically authenticated with the server, however,
+    if the store_id and store_card_number are missing, then we don't have enough information to query or clip coupons.
     """
 
+    db_id: int  # Database ID of the Account object.
+    username: str  # Username (Email) from the Account object. Stored here to attempt to reduce DB calls just to print/show the user's email.
     token: str
     store_id: str
     store_card_number: str
@@ -60,14 +45,17 @@ class CouponConfig(BaseModel):
     The alternative is to use string manipulation on values like: "$0.50" instead of using price_off: float.
     """
 
-    model_config = ConfigDict(extra="allow")  # Stores extra fields in self.__pydantic_extra__
+    model_config = ConfigDict(
+        # See model_post_init below
+        extra="allow"  # Stores extra fields in self.__pydantic_extra__
+    )
 
     type: str  # price_off  Might reference the 'price_off' variable. Unsure of all options
     price_off: float  # 0.5  Half a US Dollar
     quantity_maximum: float  # 1.0
     quantity_minimum: int | None = None
 
-    def model_post_init(self, context: Any, /) -> None:
+    def model_post_init(self, context: Any) -> None:
         """
         The returned fields from the API do not always contain every field.
         This is to identify the extra fields without throwing an exception or ignoring them.
@@ -88,6 +76,7 @@ class Coupon(BaseModel):
     """
 
     model_config = ConfigDict(
+        # See model_post_init below
         extra="allow",  # Stores extra fields in self.__pydantic_extra__
         # arbitrary_types_allowed=True
     )
@@ -106,10 +95,12 @@ class Coupon(BaseModel):
     is_clipped: bool | None = None
     is_clippable: bool | None = None
     offer_value: str | None = None  # '$0.50'
+    price: str | None = None  # '$3.29'
+    base_price: float | None = None  # 3.29
     # Properties below this point aren't really used for anything yet.
     department_id: str | None = None  # 'grocery'
     department: str | None = None  # 'Grocery'
-    config: CouponConfig | None = None
+    config: CouponConfig | None = None  # Data easier to calculate (0.50 instead of '$0.5')
     popularity: int | None = None  # 999999
     is_personalized: bool | None = None
     is_featured: bool | None = None
@@ -124,7 +115,7 @@ class Coupon(BaseModel):
     split_quantity: int | None = None  # 1
     products_are_sold_by_weight: bool | None = None
 
-    def model_post_init(self, context: Any, /) -> None:
+    def model_post_init(self, context: Any) -> None:
         """
         The returned fields from the API do not always contain every field.
         This is to identify the extra fields without throwing an exception or ignoring them.
@@ -148,5 +139,5 @@ class CouponResponse(BaseModel):
 class ClipPayload(BaseModel):
     """Input/Payload object passed into the clip coupons activity and service method."""
 
-    account: Account
-    coupons: list[Coupon]
+    account_session: AccountSession
+    coupon: Coupon
