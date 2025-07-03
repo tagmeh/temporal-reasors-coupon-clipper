@@ -6,7 +6,7 @@ from temporalio import activity
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import Worker
 
-from coupon_clipper.workflows import ClipCouponsWorkflow
+from app import ClipCouponsWorkflow
 
 
 class TemporalWorkflowTestCase(unittest.IsolatedAsyncioTestCase):

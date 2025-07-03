@@ -4,9 +4,9 @@ from unittest.mock import patch, mock_open
 
 from temporalio.testing import ActivityEnvironment
 
-from app.activities.reasors_activities import ReasorsActivities
+from app.coupon_clipper.activities import ReasorsActivities
 from app.exceptions import AuthenticationError, OfferError
-from app.models.schemas import Creds, Account, CouponResponse, Coupon
+from app.coupon_clipper.schemas import AccountSession, CouponResponse, Coupon
 
 
 class TestReasorsActivities(unittest.IsolatedAsyncioTestCase):
@@ -15,8 +15,12 @@ class TestReasorsActivities(unittest.IsolatedAsyncioTestCase):
         self.activity_env = ActivityEnvironment()
         self.service = ReasorsActivities()
         self.creds = Creds(username="Fry@planetexpress.com", password="encrypted_password")
-        self.account = Account(
-            token="asd123aj1gds1df2f1s12s1f1", store_id="1077", store_card_number="121312577181273654"
+        self.account = AccountSession(
+            token="asd123aj1gds1df2f1s12s1f1",
+            store_id="1077",
+            store_card_number="121312577181273654",
+            db_id=1,
+            username="",
         )
         self.coupon = Coupon(id="ICE_1234_123123")
         self.coupon_list = [self.coupon, Coupon(id="ICE_1234_1231234"), Coupon(id="ICE_1234_1231236")]
@@ -89,10 +93,10 @@ class TestReasorsActivities(unittest.IsolatedAsyncioTestCase):
         authenticate_mock.return_value = self.account
 
         # Act
-        output: Account = await self.activity_env.run(self.service.auth, self.creds)
+        output: AccountSession = await self.activity_env.run(self.service.auth, self.creds)
 
         # Assert
-        self.assertIsInstance(output, Account)
+        self.assertIsInstance(output, AccountSession)
 
     @patch("coupon_clipper.activities.ReasorsService.authenticate")
     async def test_auth_AuthenticationError(self, authenticate_mock):

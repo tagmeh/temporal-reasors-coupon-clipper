@@ -2,8 +2,8 @@ import unittest
 from unittest.mock import patch, MagicMock
 
 from app.exceptions import OfferError
-from app.services.reasors_service import ReasorsService
-from app.models.schemas import Account, Coupon, CouponResponse
+from app.coupon_clipper.service import ReasorsService
+from app.coupon_clipper.schemas import AccountSession, Coupon, CouponResponse
 
 
 class TestReasorsServiceGetCoupons(unittest.TestCase):
@@ -35,7 +35,7 @@ class TestReasorsServiceGetCoupons(unittest.TestCase):
             "card_number_barcode": "400001234567",
         }
 
-    @patch("coupon_clipper.reasors_service.requests.get")
+    @patch("coupon_clipper.service.requests.get")
     def test_get_coupons_success(self, get_mock):
         """Classic successful call that returns coupons."""
         # Arrange
@@ -47,7 +47,7 @@ class TestReasorsServiceGetCoupons(unittest.TestCase):
         get_mock.return_value = response_mock
 
         # Act
-        response: CouponResponse = self.service.get_coupons(account=self.account, is_clipped=False)
+        response: CouponResponse = self.service.get_coupons(account_session=self.account, is_clipped=False)
 
         # Assert
         self.assertIsInstance(response, CouponResponse)
@@ -57,7 +57,7 @@ class TestReasorsServiceGetCoupons(unittest.TestCase):
         self.assertIsInstance(response.coupons[0], Coupon)
         self.assertEqual(response.coupons[0].id, self.successful_response["items"][0]["id"])
 
-    @patch("coupon_clipper.reasors_service.requests.get")
+    @patch("coupon_clipper.service.requests.get")
     def test_get_coupons_bad_token(self, get_mock):
         """API call with a bad token. Returns a 400, no coupons."""
         # Arrange
@@ -72,11 +72,11 @@ class TestReasorsServiceGetCoupons(unittest.TestCase):
 
         # Act/Assert
         with self.assertRaises(OfferError) as err:
-            self.service.get_coupons(account=self.account, is_clipped=False)
+            self.service.get_coupons(account_session=self.account, is_clipped=False)
 
         self.assertIn("sign_out_required", err.exception.message)
 
-    @patch("coupon_clipper.reasors_service.requests.get")
+    @patch("coupon_clipper.service.requests.get")
     def test_get_coupons_no_coupons(self, get_mock):
         """Successful API call that returns no coupons."""
         # Arrange
@@ -88,7 +88,7 @@ class TestReasorsServiceGetCoupons(unittest.TestCase):
         get_mock.return_value = response_mock
 
         # Act
-        response: CouponResponse = self.service.get_coupons(account=self.account, is_clipped=False)
+        response: CouponResponse = self.service.get_coupons(account_session=self.account, is_clipped=False)
 
         # Assert
         self.assertIsInstance(response, CouponResponse)

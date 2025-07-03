@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.models.db import Base
+from app.database.schemas import Base
 
 from dotenv import dotenv_values
 
