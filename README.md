@@ -32,7 +32,7 @@ Update `SERVER_URL` to your Temporal server.
 To add your Reasors.com account:
 1. Run the password encryption script:
    ```sh
-   python encrypt_password.py
+   python -m app.scripts.encrypt_password
    ```
 2. The first time you run it, if `PASSWORD_SALT_BASE64` is empty, it will generate a salt and print it. Copy this value into your `.env` as `PASSWORD_SALT_BASE64`.
 3. Enter your Reasors.com password (in plaintext) when prompted. The script will output an encrypted password.
@@ -61,7 +61,7 @@ The parent workflow will create a child workflow for each account in the databas
 - The parent workflow (`ClipCouponsWorkflow`) spawns a child workflow (`ClipCouponsChildWorkflow`) for each account.
 - Each child workflow logs in, fetches available coupons, and clips them.
 - The savings happen when you scan your store loyalty card at checkout. Relevant coupons are automatically applied to the order. 
-- 
+
 
 ### Cancelled Features
 - I had previously wanted to track savings over time, however the API doesn't indicate when you've used a coupon. So I've scrapped the database tables responsible for saving the clipped coupon and redeemed coupon data.
