@@ -10,10 +10,10 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from dotenv import dotenv_values
 from temporalio import activity
 
-from app.models.db import Account
+from app.database.schemas import Account
 from app.exceptions import AuthenticationError, OfferError, ConfigError
-from app.models.schemas import CouponResponse, Coupon, AccountSession
-from app.services.database_service import get_session
+from app.coupon_clipper.schemas import CouponResponse, Coupon, AccountSession
+from app.database.service import get_session
 
 
 @dataclass
@@ -61,12 +61,7 @@ class ReasorsService:
 
     @staticmethod
     def get_db_account(account_id: int) -> Account:
-        """
-        Queries the Account database for the username and encrypted password.
-        This is done within an activity (and without passing it into or out of an activity) to avoid logging the
-        user credentials, specifically the encrypted password.
-        """
-        # TODO: Add database specific exception handling.
+
         session = get_session()
         return session.query(Account).filter(Account.id == account_id).one()
 

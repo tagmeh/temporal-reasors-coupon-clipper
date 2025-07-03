@@ -6,7 +6,7 @@ from temporalio.common import RetryPolicy
 from temporalio.workflow import ParentClosePolicy
 
 with workflow.unsafe.imports_passed_through():
-    from app.activities.reasors_activities import ReasorsActivities
+    from app.coupon_clipper.activities import ReasorsActivities
 
 
 @workflow.defn

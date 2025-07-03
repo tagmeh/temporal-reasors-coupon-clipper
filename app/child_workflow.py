@@ -4,8 +4,8 @@ from temporalio import workflow
 from temporalio.common import RetryPolicy
 
 with workflow.unsafe.imports_passed_through():
-    from app.activities.reasors_activities import ReasorsActivities
-    from app.models.schemas import CouponResponse, ClipPayload, Coupon, AccountSession
+    from app.coupon_clipper.activities import ReasorsActivities
+    from app.coupon_clipper.schemas import CouponResponse, ClipPayload, Coupon, AccountSession
 
 
 @workflow.defn
@@ -31,14 +31,6 @@ class ClipCouponsChildWorkflow:
             retry_policy=retry_policy,
         )
 
-        # Update the database with any new coupons.
-        await workflow.execute_activity(
-            ReasorsActivities.update_db_coupons,
-            coupon_response.coupons,
-            start_to_close_timeout=timedelta(seconds=60),
-            retry_policy=retry_policy,
-        )
-
         # Clip the available coupons.
         clipped_coupons: list[Coupon] = []
         for coupon in coupon_response.coupons:  # Coupon
@@ -58,10 +50,5 @@ class ClipCouponsChildWorkflow:
             clipped_coupons.append(clipped_coupon)
 
         print(f"Clipped {len(clipped_coupons)} coupon(s)!")
-
-        # Query if user has redeemed any coupons
-        # Pending IRL testing.
-
-        # update RedeemedCoupon database for the user, for each coupon.
 
         return str(len(coupon_response.coupons))

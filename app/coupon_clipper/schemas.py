@@ -50,10 +50,12 @@ class CouponConfig(BaseModel):
         extra="allow"  # Stores extra fields in self.__pydantic_extra__
     )
 
-    type: str  # price_off  Might reference the 'price_off' variable. Unsure of all options
-    price_off: float  # 0.5  Half a US Dollar
-    quantity_maximum: float  # 1.0
+    type: str | None = None  # price_off  Might reference the 'price_off' variable. Unsure of all options
+    price_off: float | None = None  # 0.5  Half a US Dollar
+    quantity_maximum: float | None = None  # 1.0
     quantity_minimum: int | None = None
+    buy: int | None = None
+    get: int | None = None
 
     def model_post_init(self, context: Any) -> None:
         """
@@ -78,7 +80,6 @@ class Coupon(BaseModel):
     model_config = ConfigDict(
         # See model_post_init below
         extra="allow",  # Stores extra fields in self.__pydantic_extra__
-        # arbitrary_types_allowed=True
     )
 
     # This is the only required property

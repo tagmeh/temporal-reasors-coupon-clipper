@@ -6,9 +6,9 @@ from temporalio.contrib.pydantic import pydantic_data_converter
 from temporalio.runtime import Runtime, TelemetryConfig, PrometheusConfig
 from temporalio.worker import Worker
 
-from app.activities.reasors_activities import ReasorsActivities
-from app.models.schemas import REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME
-from app.workflows import child, parent
+from app.coupon_clipper.activities import ReasorsActivities
+from app.coupon_clipper.schemas import REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME
+from app import ClipCouponsWorkflow, ClipCouponsChildWorkflow
 
 config = dotenv_values(".env")
 
@@ -27,12 +27,11 @@ async def main() -> None:
     worker: Worker = Worker(
         client,
         task_queue=REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME,
-        workflows=[parent.ClipCouponsWorkflow, child.ClipCouponsChildWorkflow],
+        workflows=[ClipCouponsWorkflow, ClipCouponsChildWorkflow],
         activities=[
             activities.get_account_ids,
             activities.auth,
             activities.get_available_coupons,
-            activities.update_db_coupons,
             activities.clip_coupon,
         ],
     )

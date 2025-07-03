@@ -4,7 +4,7 @@ from unittest.mock import patch
 from cryptography.fernet import InvalidToken
 
 from app.exceptions import ConfigError
-from app.services.reasors_service import ReasorsService
+from app.coupon_clipper.service import ReasorsService
 
 
 class TestReasorsServiceDecryptPassword(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestReasorsServiceDecryptPassword(unittest.TestCase):
             "DECRYPTION_MASTER_KEY": "CoolMasterKeyPassword",
             "PASSWORD_SALT_BASE64": "3iAnyqPkGBpsECHJ7wmgykyM1vNfszt6HVy9gzKKzHY=",
         }
-        patcher = patch("coupon_clipper.reasors_service.dotenv_values", return_value=self.config)
+        patcher = patch("coupon_clipper.service.dotenv_values", return_value=self.config)
         self.addCleanup(patcher.stop)
         patcher.start()
 

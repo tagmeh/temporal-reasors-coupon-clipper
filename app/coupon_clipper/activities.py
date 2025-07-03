@@ -2,12 +2,12 @@ import json
 
 from temporalio import activity
 
-from app.models.db import Account, DBCoupon
-from app.services.database_service import get_session, init_db
+from app.database.schemas import Account
+from app.database.service import get_session, init_db
 
 from app.exceptions import AuthenticationError, OfferError
-from app.services.reasors_service import ReasorsService
-from app.models.schemas import AccountSession, CouponResponse, ClipPayload, Coupon
+from app.coupon_clipper.service import ReasorsService
+from app.coupon_clipper.schemas import AccountSession, CouponResponse, ClipPayload, Coupon
 
 
 class ReasorsActivities:
@@ -16,7 +16,6 @@ class ReasorsActivities:
     @activity.defn
     async def get_account_ids(self) -> list[int]:
         try:
-
             init_db()
             session = get_session()
             accounts = session.query(Account).all()
@@ -79,38 +78,6 @@ class ReasorsActivities:
             raise
         except Exception as err:
             activity.logger.exception(f"Unhandled Coupon Exception: {err}", exc_info=True)
-            raise
-
-    @activity.defn
-    async def update_db_coupons(self, coupons: list[Coupon]) -> None:
-        """
-        Updates the database with the queried coupons.
-        """
-        try:
-            with get_session() as session:
-                for coupon in coupons:  # Coupon
-                    # Attempt to get the coupon from the database.
-                    db_coupon = session.query(DBCoupon).filter_by(coupon_id=coupon.id).first()
-                    if not db_coupon:
-                        db_coupon = DBCoupon(
-                            coupon_id=coupon.id,
-                            name=coupon.name,
-                            description=coupon.description,
-                            brand=coupon.brand,
-                            price=coupon.base_price,
-                            price_off=coupon.config.price_off,
-                            start_date=coupon.start_date,
-                            finish_date=coupon.finish_date,
-                            clip_start_date=coupon.clip_start_date,
-                            clip_end_date=coupon.clip_end_date,
-                        )
-                        session.add(db_coupon)
-                        session.flush()
-
-                session.commit()
-
-        except Exception as err:
-            activity.logger.exception(f"Unhandled Database Exception: {err}", exc_info=True)
             raise
 
     @activity.defn

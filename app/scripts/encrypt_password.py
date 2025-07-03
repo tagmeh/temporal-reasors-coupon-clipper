@@ -9,8 +9,8 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from dotenv import dotenv_values
 
-from app.models.db import Account
-from app.services.database_service import init_db, get_session
+from app.database.schemas import Account
+from app.database.service import init_db, get_session
 
 logging.basicConfig(level=logging.INFO)
 
