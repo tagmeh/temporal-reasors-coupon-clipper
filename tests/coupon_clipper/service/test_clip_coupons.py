@@ -13,7 +13,11 @@ class TestReasorsServiceClipCoupons(unittest.TestCase):
     def setUp(self):
         self.service = ReasorsService()
         self.account: AccountSession = AccountSession(
-            db_id=1, username="PhillipJFry@planetexpress.com", token="1a2b3c4d5e6f7g8h9i10j11k12l", store_id="1234", store_card_number="123456789011121314151617181920"
+            db_id=1,
+            username="PhillipJFry@planetexpress.com",
+            token="1a2b3c4d5e6f7g8h9i10j11k12l",
+            store_id="1234",
+            store_card_number="123456789011121314151617181920",
         )
 
         self.unclipped_coupon = Coupon(id="ICE_1234_123123", is_clipped=False)

@@ -17,7 +17,7 @@ async def main() -> None:
     client: Client = await Client.connect(url, namespace=config["NAMESPACE"], data_converter=pydantic_data_converter)
 
     try:
-        if cron_schedule := config.get('CRON_SCHEDULE'):
+        if cron_schedule := config.get("CRON_SCHEDULE"):
             await client.create_schedule(
                 "clip-coupons-workflow",
                 Schedule(
@@ -26,14 +26,14 @@ async def main() -> None:
                         id="Reasors Coupon Clipper Parent",
                         task_queue=REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME,
                     ),
-                    spec=ScheduleSpec(cron_expressions=[cron_schedule], time_zone_name=config.get('TIME_ZONE', UTC)),
+                    spec=ScheduleSpec(cron_expressions=[cron_schedule], time_zone_name=config.get("TIME_ZONE", UTC)),
                 ),
             )
         else:
             await client.execute_workflow(
                 "ClipCouponsWorkflow",
                 id="Reasors Coupon Clipper Parent",
-                task_queue=REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME
+                task_queue=REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME,
             )
     except WorkflowFailureError:
         print("Got expected exception: ", traceback.format_exc())

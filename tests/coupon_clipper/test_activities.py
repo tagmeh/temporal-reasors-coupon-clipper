@@ -16,7 +16,11 @@ class TestReasorsActivities(unittest.IsolatedAsyncioTestCase):
         self.service = ReasorsActivities()
         self.creds = Creds(username="Fry@planetexpress.com", password="encrypted_password")
         self.account = AccountSession(
-            token="asd123aj1gds1df2f1s12s1f1", store_id="1077", store_card_number="121312577181273654", db_id=1, username=''
+            token="asd123aj1gds1df2f1s12s1f1",
+            store_id="1077",
+            store_card_number="121312577181273654",
+            db_id=1,
+            username="",
         )
         self.coupon = Coupon(id="ICE_1234_123123")
         self.coupon_list = [self.coupon, Coupon(id="ICE_1234_1231234"), Coupon(id="ICE_1234_1231236")]
