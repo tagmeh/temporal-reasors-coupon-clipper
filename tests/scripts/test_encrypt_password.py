@@ -1,5 +1,5 @@
 import unittest
-from app.scripts.encrypt_password import encrypt_password
+from app.encrypt_password import encrypt_password
 from cryptography.fernet import Fernet
 import base64
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC

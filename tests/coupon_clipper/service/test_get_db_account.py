@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session, Session
 
 from app.coupon_clipper.service import ReasorsService
-from app.database.schemas import Base, Account  # Adjust import paths
+from app.database_utils import Base, Account  # Adjust import paths
 
 
 class TestReasorsServiceAuthenticate(unittest.TestCase):
