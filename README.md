@@ -1,5 +1,7 @@
 # Reasors Digital Coupon Clipper Temporal Workflow
 
+Pending a rewrite after dockerizing project. Expected around 7/15/25.
+
 **This project is an unofficial tool and is not affiliated with, endorsed by, or related to Reasors.com or Reasor's Foods in any way.**
 
 ## Use Case
