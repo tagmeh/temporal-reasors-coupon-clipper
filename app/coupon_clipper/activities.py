@@ -42,7 +42,8 @@ class ReasorsActivities:
             # TODO: Replace section with logging.
             if coupon_response.coupon_count > 0:
                 print(
-                    f"{account_session.db_id}:{account_session.username:<30}: Found {coupon_response.coupon_count} coupons!")
+                    f"{account_session.db_id}:{account_session.username:<30}: Found {coupon_response.coupon_count} coupons!"
+                )
             else:
                 print(f"{account_session.db_id}:{account_session.username:<30}: No new coupons.")
             return coupon_response
@@ -52,7 +53,8 @@ class ReasorsActivities:
         except Exception as err:
             activity.logger.exception(
                 f"{account_session.db_id}:{account_session.username:<30}: Unhandled Coupon Exception: {err}",
-                exc_info=True)
+                exc_info=True,
+            )
             raise
 
     @activity.defn
@@ -66,5 +68,6 @@ class ReasorsActivities:
         except Exception as err:
             activity.logger.exception(
                 f"{clip_payload.account_session.db_id}:{clip_payload.account_session.username:<30}: Unhandled Coupon Exception: {err}",
-                exc_info=True)
+                exc_info=True,
+            )
             raise

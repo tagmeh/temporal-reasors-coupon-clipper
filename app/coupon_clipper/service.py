@@ -117,7 +117,8 @@ class ReasorsService:
             )
         else:
             raise OfferError(
-                f"{account_session.db_id}:{account_session.username:<30}: Get Coupons API Error: {response.status_code} - {response.json()}")
+                f"{account_session.db_id}:{account_session.username:<30}: Get Coupons API Error: {response.status_code} - {response.json()}"
+            )
 
     def get_redeemed_coupons(self, account_session: AccountSession) -> CouponResponse:
         """Contains the is_redeemed param, which, if present in get_coupons(), may return incomplete results."""
@@ -141,7 +142,8 @@ class ReasorsService:
             )
         else:
             raise OfferError(
-                f"{account_session.db_id}:{account_session.username:<30}: Redeemed API Error: {response.status_code} - {response.content}")
+                f"{account_session.db_id}:{account_session.username:<30}: Redeemed API Error: {response.status_code} - {response.content}"
+            )
 
     def clip_coupon(self, account_session: AccountSession, coupon: Coupon) -> Coupon:
         """
@@ -164,12 +166,14 @@ class ReasorsService:
 
         if response.ok:
             print(  # TODO: Use Temporal's logging. Also, find out where these logs exist in the GUI.
-                f"{account_session.db_id}:{account_session.username:<30}: Clipped coupon {coupon.id}. " f"Value: {coupon.offer_value} for {coupon.brand}: {coupon.description}"
+                f"{account_session.db_id}:{account_session.username:<30}: Clipped coupon {coupon.id}. "
+                f"Value: {coupon.offer_value} for {coupon.brand}: {coupon.description}"
             )
             # Updating is_clipped here, but we could just re-query the coupons to get the same value.
             coupon.is_clipped = True
         else:
             activity.logger.warn(
-                f"{account_session.db_id}:{account_session.username:<30}: Failed to clip coupon '{coupon.id}': {response.status_code} - {response.content}")
+                f"{account_session.db_id}:{account_session.username:<30}: Failed to clip coupon '{coupon.id}': {response.status_code} - {response.content}"
+            )
 
         return coupon
