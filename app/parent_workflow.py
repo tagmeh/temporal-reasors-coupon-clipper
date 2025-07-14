@@ -19,12 +19,14 @@ class ClipCouponsWorkflow:
             non_retryable_error_types=["JSONDecodeError", "ConfigError"],
         )
 
-        # Query the database Account table and get only the account IDs.
+        # Query the database_utils Account table and get only the account IDs.
         account_ids: list[int] = await workflow.execute_activity(
             ReasorsActivities.get_account_ids, start_to_close_timeout=timedelta(seconds=30), retry_policy=retry_policy
         )
 
-        # Spins up a child workflow for each ID found in the database table Account
+        print(f"Parent - Found {len(account_ids)} accounts.")
+
+        # Spins up a child workflow for each ID found in the database_utils table Account
         tasks = [
             workflow.start_child_workflow(
                 "ClipCouponsChildWorkflow",
@@ -35,6 +37,8 @@ class ClipCouponsWorkflow:
             for account_id in account_ids
         ]
 
-        await asyncio.gather(*tasks)
+        if tasks:
+            await asyncio.gather(*tasks)
+            print(f"Parent - Submitted {len(tasks)} tasks.")
 
         return f"Finished parent workflow. Ran for {len(tasks)} accounts."

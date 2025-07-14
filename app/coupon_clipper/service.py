@@ -1,5 +1,6 @@
 import base64
 import datetime
+import os
 from dataclasses import dataclass
 
 import requests
@@ -7,13 +8,12 @@ from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from dotenv import dotenv_values
 from temporalio import activity
 
-from app.database.schemas import Account
-from app.exceptions import AuthenticationError, OfferError, ConfigError
 from app.coupon_clipper.schemas import CouponResponse, Coupon, AccountSession
-from app.database.service import get_session
+from app.database_utils.schemas import Account
+from app.database_utils.service import get_session
+from app.exceptions import AuthenticationError, OfferError, ConfigError
 
 
 @dataclass
@@ -37,13 +37,12 @@ class ReasorsService:
             "sec-fetch-site": "cross-site",
             "sec-gpc": "1",
         }
-        self.config = dotenv_values(".env")
 
     def decrypt_password(self, encrypted_password: str) -> str:
         encoded_encrypted_password = encrypted_password.encode()
         try:
-            password = self.config["DECRYPTION_MASTER_KEY"].encode()
-            salt = base64.b64decode(self.config["PASSWORD_SALT_BASE64"])
+            password = os.environ["DECRYPTION_MASTER_KEY"].encode()
+            salt = base64.b64decode(os.environ["PASSWORD_SALT_BASE64"])
         except KeyError as err:
             raise ConfigError(f"Missing configuration value in .env file: {err}")
 
@@ -117,7 +116,8 @@ class ReasorsService:
                 coupons=[Coupon(**item) for item in response_json.get("items", [])],
             )
         else:
-            raise OfferError(f"Get Coupons API Error: {response.status_code} - {response.json()}")
+            raise OfferError(
+                f"{account_session.db_id}:{account_session.username:<30}: Get Coupons API Error: {response.status_code} - {response.json()}")
 
     def get_redeemed_coupons(self, account_session: AccountSession) -> CouponResponse:
         """Contains the is_redeemed param, which, if present in get_coupons(), may return incomplete results."""
@@ -140,7 +140,8 @@ class ReasorsService:
                 coupons=[Coupon(**item) for item in response_json.get("items", [])],
             )
         else:
-            raise OfferError(f"Redeemed API Error: {response.status_code} - {response.content}")
+            raise OfferError(
+                f"{account_session.db_id}:{account_session.username:<30}: Redeemed API Error: {response.status_code} - {response.content}")
 
     def clip_coupon(self, account_session: AccountSession, coupon: Coupon) -> Coupon:
         """
@@ -155,7 +156,7 @@ class ReasorsService:
             "utc": int(datetime.datetime.now(datetime.UTC).timestamp() * 1000),
         }
 
-        print(f"Clipping {coupon.id}")
+        print(f"{account_session.db_id}:{account_session.username:<30}: Clipping {coupon.id}")
 
         url = f"{self.base_url}/1/offers/{coupon.id}/clip"
         response = requests.post(url, data=payload, headers=self.headers, verify=False)
@@ -163,15 +164,12 @@ class ReasorsService:
 
         if response.ok:
             print(  # TODO: Use Temporal's logging. Also, find out where these logs exist in the GUI.
-                f"Clipped coupon {coupon.id}. " f"Value: {coupon.offer_value} for {coupon.brand}: {coupon.description}"
+                f"{account_session.db_id}:{account_session.username:<30}: Clipped coupon {coupon.id}. " f"Value: {coupon.offer_value} for {coupon.brand}: {coupon.description}"
             )
             # Updating is_clipped here, but we could just re-query the coupons to get the same value.
             coupon.is_clipped = True
         else:
-            activity.logger.warn(f"Failed to clip coupon '{coupon.id}': {response.status_code} - {response.content}")
-
-        print(f"{coupon.id=}")
-        # TODO: Review activity timeouts. Do we need a heartbeat or a len(coupons)*5 seconds for the timeout.
-        # activity.heartbeat(str(coupon.id))  # TODO: heartbeat fails if coupon.id is an empty string. Not sure why yet.
+            activity.logger.warn(
+                f"{account_session.db_id}:{account_session.username:<30}: Failed to clip coupon '{coupon.id}': {response.status_code} - {response.content}")
 
         return coupon
