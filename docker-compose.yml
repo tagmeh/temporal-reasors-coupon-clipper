@@ -1,0 +1,17 @@
+services:
+  reasors-coupon-clipper:
+    image: tagmeh/reasors-coupon-clipper
+    container_name: reasors-coupon-clipper
+    environment:
+      # The Temporal UI requires HTTPS for some actions. The script is setup to communicate with the server locally (ip address + port)
+      SERVER_IP_ADDR: "x.x.x.x"  # Port defaults to 7233
+      TIME_ZONE: "America/Chicago"  # Reasors are only in this time zone.
+      # If a CRON_SCHEDULE is set, a schedule will be created within Temporal. To update, you must delete the schedule in Temporal first.
+      # If not set, and START_WORKFLOW is true, then the workflow will run once per container (re)start.
+      # CRON_SCHEDULE: "0 0,6,12,18 * * *" # Runs every 6 hours.
+      # Set to false if the workflow's schedule is already set, and you're just turning up the worker.
+      START_WORKFLOW: true
+      PASSWORD_SALT_BASE64: "See the README on how to generate a salt"
+      DECRYPTION_MASTER_KEY: ReplaceWithYourOwnDecryptionMasterKey
+    volumes:
+      - /var/rcct/database:/app/database

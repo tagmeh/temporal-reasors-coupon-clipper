@@ -1,5 +1,6 @@
 # Project Specific
-/coupons.db
+app/database/coupons.db
+dev-docker-compose.yml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

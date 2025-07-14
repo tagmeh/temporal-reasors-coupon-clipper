@@ -35,10 +35,6 @@ class ClipCouponsChildWorkflow:
         clipped_coupons: list[Coupon] = []
         for coupon in coupon_response.coupons:  # Coupon
 
-            # TODO: Test if an interrupted workflow will resume mid-array, if it does, this section can be removed.
-            if coupon.is_clipped:
-                continue
-
             clipped_coupon: Coupon = await workflow.execute_activity(
                 ReasorsActivities.clip_coupon,
                 ClipPayload(account_session=account_session, coupon=coupon),
@@ -49,6 +45,6 @@ class ClipCouponsChildWorkflow:
 
             clipped_coupons.append(clipped_coupon)
 
-        print(f"Clipped {len(clipped_coupons)} coupon(s)!")
+        print(f"{account_session.db_id}:{account_session.username:<30}: Clipped {len(clipped_coupons)} coupon(s)!")
 
         return str(len(coupon_response.coupons))

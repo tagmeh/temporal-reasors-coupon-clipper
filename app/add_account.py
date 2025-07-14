@@ -1,28 +1,28 @@
 import base64
 import logging
 import os
-from typing import Any
+import sys
 
 from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 
-from app.database.schemas import Account
-from app.database.service import init_db, get_session
+from app.database_utils.schemas import Account
+from app.database_utils.service import init_db, get_session
 
 logging.basicConfig(level=logging.INFO)
 
 log = logging.getLogger(__name__)
 
 
-def encrypt_password(config: dict[str, Any], input_password: str) -> str:
-    DECRYPTION_MASTER_KEY: str = config["DECRYPTION_MASTER_KEY"]
+def encrypt_password(input_password: str) -> str:
+    DECRYPTION_MASTER_KEY: str = os.environ["DECRYPTION_MASTER_KEY"]
     if not DECRYPTION_MASTER_KEY:
         raise ValueError("DECRYPTION_MASTER_KEY must be set in the .env file. Needs to be some password-like string.")
 
-    PASSWORD_SALT_BASE64: str = config["PASSWORD_SALT_BASE64"]
+    PASSWORD_SALT_BASE64: str = os.environ["PASSWORD_SALT_BASE64"]
 
     password = DECRYPTION_MASTER_KEY.encode()
     try:
@@ -56,14 +56,17 @@ def insert_into_database(username: str, password: str) -> int:
 
 
 if __name__ == "__main__":
+    username = sys.argv[1]
+    password = sys.argv[2]
+
     init_db()
-    config = dotenv_values("../../.env")
-    username = input("Username (Email): ")
-    input_password = input("Plaintext Password: ")
-    if not username or not input_password:
-        print("Please enter your username and password.")
+    load_dotenv()
+
+    if not username or not password:
+        print("Please enter your username and password. e.g. python -m app.database.add_account username password.")
         exit(1)
-    result = encrypt_password(config=config, input_password=input_password)
-    print(result)
+
+    result = encrypt_password(input_password=password)
+
     account_id: int = insert_into_database(username=username, password=result)
     print(f"Username and Password stored in the database. ID: {account_id}")

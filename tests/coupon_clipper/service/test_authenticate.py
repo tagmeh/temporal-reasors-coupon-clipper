@@ -12,9 +12,7 @@ class TestReasorsServiceAuthenticate(unittest.TestCase):
 
         # Mock the ReasorsService.decrypt_password method for all tests.
         self.decrypted_password = "decrypted_password"
-        patcher = patch(
-            "coupon_clipper.service.ReasorsService.decrypt_password", return_value=self.decrypted_password
-        )
+        patcher = patch("coupon_clipper.service.ReasorsService.decrypt_password", return_value=self.decrypted_password)
         self.addCleanup(patcher.stop)
         self.decrypt_password_mock = patcher.start()
 
@@ -35,7 +33,7 @@ class TestReasorsServiceAuthenticate(unittest.TestCase):
         post_mock.return_value = response_mock
 
         # Act
-        result: AccountSession = self.service.authenticate(account_id=)
+        result: AccountSession = self.service.authenticate(account_id=1)
 
         # Assert
         self.assertIsInstance(result, AccountSession)
@@ -58,7 +56,7 @@ class TestReasorsServiceAuthenticate(unittest.TestCase):
 
         # Act/Assert
         with self.assertRaises(AuthenticationError):
-            self.service.authenticate(account_id=)
+            self.service.authenticate(account_id=1)
 
         # Verify/Require that the decrypt_password method was used.
         self.decrypt_password_mock.assert_called_once_with(self.creds.password)

@@ -6,8 +6,6 @@ from typing_extensions import Self
 
 from app.exceptions import MissingAccountInfoError
 
-REASORS_COUPON_CLIPPER_TASK_QUEUE_NAME = "REASORS_COUPON_CLIPPER_TASK_QUEUE"
-
 
 class AccountSession(BaseModel):
     """

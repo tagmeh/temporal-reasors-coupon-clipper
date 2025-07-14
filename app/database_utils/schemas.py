@@ -1,7 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Date
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
-from datetime import datetime, UTC
+
 from sqlalchemy.sql import func
 
 Base = declarative_base()
